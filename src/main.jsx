@@ -496,7 +496,7 @@ function App(){
               </linearGradient>
             </defs>
             <YAxis hide domain={['dataMin','dataMax']}/>
-            <Area type="monotone" dataKey="combined" dot={false} stroke={pctCombined >= 0 ? "#16d98a" : "#ff4d5c"} strokeWidth={2} fill="url(#sideInsightGrad)"/>
+            <Area type="monotone" dataKey="combined" dot={false} stroke={pctCombined >= 0 ? "#10b981" : "#f87171"} strokeWidth={2} fill="url(#sideInsightGrad)"/>
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -552,20 +552,20 @@ function App(){
                     <stop offset="100%" stopColor="#f6a21a" stopOpacity="0.02"/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#1c2940" strokeDasharray="2 3" vertical={false}/>
+                <CartesianGrid stroke="rgba(16, 185, 129, 0.12)" strokeDasharray="2 3" vertical={false}/>
                 <XAxis dataKey="date" tickFormatter={(x)=>{if(!x)return "";if(period==="1M"||period==="3M")return x.slice(5);if(period==="6M"||period==="1Y")return x.slice(2,7);return x.slice(0,4);}} tick={{fill:"#7f8da5",fontSize:11}} axisLine={false} minTickGap={28}/>
                 <YAxis width={76} tickFormatter={(v)=>{const cr=v/100;return `₹${Math.round(cr).toLocaleString("en-IN")} Cr`;}} tick={{fill:"#7f8da5",fontSize:11}} axisLine={false} domain={period==="ALL"?[0,"auto"]:["auto","auto"]}/>
-                <Tooltip contentStyle={{background:"#0b1424",border:"1px solid #263650",borderRadius:10,color:"#fff",fontSize:12}} labelFormatter={(label)=>fmtDate(label)} formatter={(v,name)=>[formatExactCr(v),name==="combined"?"Total MTF Book":name==="nse"?"NSE Book":name==="bse"?"BSE Book":name]}/>
+                <Tooltip contentStyle={{background:"rgba(6, 26, 20, 0.94)",backdropFilter:"blur(10px)",border:"1px solid rgba(16, 185, 129, 0.3)",borderRadius:10,color:"#f9fafb",fontSize:12}} labelFormatter={(label)=>fmtDate(label)} formatter={(v,name)=>[formatExactCr(v),name==="combined"?"Total MTF Book":name==="nse"?"NSE Book":name==="bse"?"BSE Book":name]}/>
                 {exchange==="ALL"?(
                   <>
-                    <Area type="monotone" dataKey="combined" name="combined" stroke="#2580ff" fill="url(#bluefill)" strokeWidth={2.5}/>
-                    <Area type="monotone" dataKey="nse" name="nse" stroke="#18d57e" fill="url(#greenfill)" strokeWidth={1.8} fillOpacity={0.2}/>
-                    <Area type="monotone" dataKey="bse" name="bse" stroke="#f6a21a" fill="url(#orangefill)" strokeWidth={1.8} fillOpacity={0.25}/>
+                    <Area type="monotone" dataKey="combined" name="combined" stroke="#10b981" fill="url(#bluefill)" strokeWidth={2.5}/>
+                    <Area type="monotone" dataKey="nse" name="nse" stroke="#06b6d4" fill="url(#greenfill)" strokeWidth={1.8} fillOpacity={0.2}/>
+                    <Area type="monotone" dataKey="bse" name="bse" stroke="#fbbf24" fill="url(#orangefill)" strokeWidth={1.8} fillOpacity={0.25}/>
                   </>
                 ):exchange==="NSE"?(
-                  <Area type="monotone" dataKey="nse" name="nse" stroke="#18d57e" fill="url(#greenfill)" strokeWidth={2.5}/>
+                  <Area type="monotone" dataKey="nse" name="nse" stroke="#06b6d4" fill="url(#greenfill)" strokeWidth={2.5}/>
                 ):(
-                  <Area type="monotone" dataKey="bse" name="bse" stroke="#f6a21a" fill="url(#orangefill)" strokeWidth={2.5}/>
+                  <Area type="monotone" dataKey="bse" name="bse" stroke="#fbbf24" fill="url(#orangefill)" strokeWidth={2.5}/>
                 )}
               </AreaChart>
             </ResponsiveContainer>
@@ -573,9 +573,9 @@ function App(){
            <div className="legend">
             {exchange==="ALL"?(
               <>
-                <span><i className="blue"/>Combined</span>
-                <span><i className="green"/>NSE</span>
-                <span><i className="orange"/>BSE</span>
+                <span><i style={{background:"#10b981",display:"inline-block",width:9,height:5,borderRadius:2,marginRight:6}}/>Combined</span>
+                <span><i style={{background:"#06b6d4",display:"inline-block",width:9,height:5,borderRadius:2,marginRight:6}}/>NSE</span>
+                <span><i style={{background:"#fbbf24",display:"inline-block",width:9,height:5,borderRadius:2,marginRight:6}}/>BSE</span>
               </>
             ):exchange==="NSE"?(
               <span><i className="green"/>NSE Margin Book</span>
@@ -897,7 +897,7 @@ function Nav({icon,text,active,badge,onClick}){
 }
 function Segment({values,value,onChange}){return <div className="segment">{values.map(v=><button key={v} className={v===value?"on":""} onClick={()=>onChange(v)}>{v}</button>)}</div>}
 function Kpi({title,value,delta,pct,subtitle,icon,chart,keyName="combined"}){
-  const strokeColor = keyName === "nse" ? "#10b981" : keyName === "bse" ? "#f59e0b" : "#3b82f6";
+  const strokeColor = keyName === "nse" ? "#06b6d4" : keyName === "bse" ? "#fbbf24" : "#10b981";
   const gradId = `kpiGrad-${keyName}`;
   const chartSlice = useMemo(() => {
     if (!chart || !chart.length) return [];
@@ -962,7 +962,7 @@ function Kpi({title,value,delta,pct,subtitle,icon,chart,keyName="combined"}){
   );
 }
 function Metric({title,value,sub,icon}){return <section className="card metric"><div><span>{title}</span><strong>{value}</strong><small>{sub}</small></div><div className="metricIcon">{React.cloneElement(icon,{size:34})}</div></section>}
-function Spark({positive}){const pts=Array.from({length:20},(_,i)=>({v:50+Math.sin(i/2)*8+i*.7+Math.random()*4}));return <div className="spark"><ResponsiveContainer width="100%" height="100%"><LineChart data={pts} margin={{top:2,bottom:2,left:2,right:2}}><YAxis hide domain={['dataMin','dataMax']}/><Line type="monotone" dataKey="v" dot={false} stroke={positive?"#17d87f":"#ff4d5c"} strokeWidth={2}/></LineChart></ResponsiveContainer></div>}
+function Spark({positive}){const pts=Array.from({length:20},(_,i)=>({v:50+Math.sin(i/2)*8+i*.7+Math.random()*4}));return <div className="spark"><ResponsiveContainer width="100%" height="100%"><LineChart data={pts} margin={{top:2,bottom:2,left:2,right:2}}><YAxis hide domain={['dataMin','dataMax']}/><Line type="monotone" dataKey="v" dot={false} stroke={positive?"#10b981":"#f87171"} strokeWidth={2}/></LineChart></ResponsiveContainer></div>}
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
