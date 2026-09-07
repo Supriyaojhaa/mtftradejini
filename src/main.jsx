@@ -897,7 +897,7 @@ function Nav({icon,text,active,badge,onClick}){
 }
 function Segment({values,value,onChange}){return <div className="segment">{values.map(v=><button key={v} className={v===value?"on":""} onClick={()=>onChange(v)}>{v}</button>)}</div>}
 function Kpi({title,value,delta,pct,subtitle,icon,chart,keyName="combined"}){
-  const strokeColor = keyName === "nse" ? "#06b6d4" : keyName === "bse" ? "#fbbf24" : "#10b981";
+  const strokeColor = keyName === "combined" ? (delta < 0 ? "#ef4444" : "#10b981") : keyName === "nse" ? (delta < 0 ? "#3b82f6" : "#06b6d4") : "#10b981";
   const gradId = `kpiGrad-${keyName}`;
   const chartSlice = useMemo(() => {
     if (!chart || !chart.length) return [];

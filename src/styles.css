@@ -6711,3 +6711,474 @@ tr:hover td {
   background: rgba(6, 26, 20, 0.7) !important;
   border: 1px solid rgba(16, 185, 129, 0.18) !important;
 }
+
+
+/* ==========================================================================
+   EXACT LIGHT THEME OVERRIDES MATCHING REFERENCE DESIGN
+   ========================================================================== */
+
+html[data-theme=light] body {
+  background: #f6faf8 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .app {
+  min-height: 100vh !important;
+  background-color: #f6faf8 !important;
+  background-image: 
+    radial-gradient(circle at 50% -5%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(246, 250, 248, 0.45) 0%, rgba(246, 250, 248, 0.96) 440px, #f6faf8 100%),
+    url('/daylight_mountain_mist.jpg') !important;
+  background-size: 100% auto, 100% auto, 100% auto !important;
+  background-repeat: no-repeat !important;
+  background-position: top center !important;
+}
+
+html[data-theme=light] .topbar {
+  background: rgba(255, 255, 255, 0.90) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  backdrop-filter: blur(14px) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+html[data-theme=light] .brand b {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme=light] .brandMark span {
+  background: linear-gradient(180deg, #34d399 0%, #10b981 100%) !important;
+}
+
+html[data-theme=light] .globalSearch,
+html[data-theme=light] .topbarSearch {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #64748b !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+html[data-theme=light] .globalSearch input,
+html[data-theme=light] .topbarSearch input {
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .live {
+  background: #10b981 !important;
+  border: 1px solid #059669 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+}
+
+html[data-theme=light] .live i {
+  background: #ffffff !important;
+  box-shadow: 0 0 6px #ffffff !important;
+}
+
+html[data-theme=light] .market span {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme=light] .market small {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .userAvatar {
+  background: #064e3b !important;
+  color: #ffffff !important;
+  border: 1px solid #047857 !important;
+}
+
+html[data-theme=light] .iconBtn,
+html[data-theme=light] .themeBtn {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+html[data-theme=light] .iconBtn:hover,
+html[data-theme=light] .themeBtn:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Sidebar in Light Mode */
+html[data-theme=light] .sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme=light] .nav {
+  color: #475569 !important;
+  border-radius: 999px !important;
+}
+
+html[data-theme=light] .nav:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .nav.active {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #065f46 !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme=light] .insight {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 12px !important;
+}
+
+html[data-theme=light] .insight span {
+  color: #64748b !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme=light] .insight p {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme=light] .insight small {
+  color: #64748b !important;
+}
+
+/* Hero Title on Overview in Light Mode */
+html[data-theme=light] .heroTitle {
+  color: #0f172a !important;
+  text-shadow: none !important;
+}
+
+html[data-theme=light] .heroSubtitle {
+  color: #475569 !important;
+  text-shadow: none !important;
+}
+
+/* Cards in Light Mode */
+html[data-theme=light] .card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 12px !important;
+}
+
+html[data-theme=light] .card:hover {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07) !important;
+}
+
+html[data-theme=light] .cardHead h2,
+html[data-theme=light] .tableHead h2 {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme=light] .cardHead p,
+html[data-theme=light] .tableHead p {
+  color: #64748b !important;
+}
+
+/* KPI Cards in Light Mode */
+html[data-theme=light] .kpi {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme=light] .kpiTitle {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme=light] .kpiValue {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme=light] .kpi>small {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .kpi:nth-child(1) .kpiIcon {
+  background: rgba(6, 182, 212, 0.1) !important;
+  color: #0891b2 !important;
+  border: 1px solid rgba(6, 182, 212, 0.22) !important;
+}
+
+html[data-theme=light] .kpi:nth-child(2) .kpiIcon {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #2563eb !important;
+  border: 1px solid rgba(59, 130, 246, 0.22) !important;
+}
+
+html[data-theme=light] .kpi:nth-child(3) .kpiIcon {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.22) !important;
+}
+
+html[data-theme=light] .kpi:nth-child(4) .kpiIcon {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #2563eb !important;
+  border: 1px solid rgba(59, 130, 246, 0.22) !important;
+}
+
+html[data-theme=light] .bars i {
+  background: linear-gradient(180deg, #34d399, #10b981) !important;
+}
+
+/* Segments and Pill Controls */
+html[data-theme=light] .segment {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+}
+
+html[data-theme=light] .segment button {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .segment button:hover {
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .segment button.on {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25) !important;
+}
+
+html[data-theme=light] .miniSegment {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme=light] .miniSegment button {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .miniSegment button.on {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+/* Daily Leverage Flow in Light Mode */
+html[data-theme=light] .flowMetaBar {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme=light] .flowPill {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+html[data-theme=light] .flowPill b {
+  color: #0f172a !important;
+}
+
+/* Book Composition in Light Mode */
+html[data-theme=light] .compCenterValue {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme=light] .compCenterSub {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .compBreakdownItem {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme=light] .compBreakdownItem:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html[data-theme=light] .compItemName {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme=light] .compItemTag {
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+html[data-theme=light] .compItemBook {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .compItemDesc {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .compBarTrack {
+  background: #e2e8f0 !important;
+}
+
+/* Summary Metric Grid */
+html[data-theme=light] .metric {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+}
+
+html[data-theme=light] .metric span {
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme=light] .metric strong {
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .metric small {
+  color: #64748b !important;
+}
+
+/* Table in Light Mode */
+html[data-theme=light] .tableCard {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme=light] .tableHead {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme=light] .tableSearch {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #64748b !important;
+}
+
+html[data-theme=light] .tableSearch input {
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .tableTools select {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme=light] table th {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme=light] table th:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme=light] table td {
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+html[data-theme=light] table tr:hover td {
+  background: #f8fafc !important;
+}
+
+html[data-theme=light] table .symbol {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme=light] .pagination {
+  color: #64748b !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme=light] .pagination button {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .pagination button:hover:not(:disabled) {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .pagination button.active {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme=light] .screenerLinkBtn {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.25) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #047857 !important;
+}
+
+html[data-theme=light] .screenerLinkBtn:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.35) 100%) !important;
+  color: #065f46 !important;
+}
+
+/* Screener View in Light Mode */
+html[data-theme=light] .presetTab {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+html[data-theme=light] .presetTab:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .presetTab.active {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25) !important;
+}
+
+html[data-theme=light] .universeBadge {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+html[data-theme=light] .statVal {
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .statMeta {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .statBar {
+  background: #e2e8f0 !important;
+}
+
+html[data-theme=light] .tableModeSegment {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+html[data-theme=light] .tableModeBtn {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .tableModeBtn.active {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
