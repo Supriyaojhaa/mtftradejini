@@ -7182,3 +7182,424 @@ html[data-theme=light] .tableModeBtn.active {
   color: #0f172a !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
+
+
+/* ==========================================================================
+   MINIMIZABLE / COLLAPSIBLE SIDEBAR CONTROLS
+   ========================================================================== */
+
+.sidebarToggleBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.sidebarToggleBtn:hover {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--text);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.sidebarTopToggleRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px 8px 4px;
+  margin-bottom: 4px;
+}
+
+.sidebarIconToggleBtn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.sidebarIconToggleBtn:hover {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* Sidebar Width & Transition */
+.sidebar {
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), padding 0.22s ease !important;
+}
+
+.sidebar.collapsed {
+  width: 64px !important;
+  min-width: 64px !important;
+  padding: 10px 8px 16px 8px !important;
+  align-items: center !important;
+}
+
+.sidebar.collapsed .sidebarTopToggleRow {
+  justify-content: center !important;
+  padding: 0 0 8px 0 !important;
+  width: 100% !important;
+}
+
+.sidebar.collapsed .nav {
+  width: 44px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  margin: 0 auto 6px auto !important;
+  border-radius: 9px !important;
+}
+
+.sidebar.collapsed .nav span {
+  margin: 0 !important;
+}
+
+.sidebar.collapsed .nav label,
+.sidebar.collapsed .nav small {
+  display: none !important;
+}
+
+.sidebar.collapsed .insight {
+  display: none !important;
+}
+
+.sidebar.collapsed .sideDownload {
+  display: none !important;
+}
+
+/* Content Area Expansion */
+.content {
+  transition: max-width 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.content.expanded {
+  max-width: calc(100vw - 64px) !important;
+  width: calc(100vw - 64px) !important;
+}
+
+/* Light Mode Overrides for Toggle Buttons */
+html[data-theme=light] .sidebarToggleBtn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+html[data-theme=light] .sidebarToggleBtn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+html[data-theme=light] .sidebarIconToggleBtn {
+  color: #64748b;
+}
+html[data-theme=light] .sidebarIconToggleBtn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+
+/* ==========================================================================
+   DAILY ACTIVITY CALENDAR HEATMAP
+   ========================================================================== */
+
+.dailyActivityCard {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 16px 20px 14px 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  margin-top: 4px;
+}
+
+.dailyActivityHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.dailyActivityTitleBlock {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dailyActivityTitleBlock h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.dailyActivityHeaderSub {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11.5px;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.dailyActDate {
+  color: var(--muted);
+}
+
+.dailyActUp {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.dailyActDown {
+  color: #f87171;
+  font-weight: 600;
+}
+
+/* Heatmap Grid */
+.dailyHeatmapContainer {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.dailyHeatmapContainer::-webkit-scrollbar {
+  height: 5px;
+}
+.dailyHeatmapContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dailyHeatmapContainer::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.heatmapGridWrap {
+  min-width: 820px;
+}
+
+.heatmapMonthsRow {
+  display: flex;
+  height: 18px;
+  margin-bottom: 4px;
+}
+
+.heatmapDayLabelSpacer {
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.heatmapMonthsTrack {
+  position: relative;
+  flex: 1;
+  height: 100%;
+}
+
+.heatmapMonthLabel {
+  position: absolute;
+  font-size: 10.5px;
+  color: var(--muted);
+  font-weight: 500;
+  transform: translateX(-50%);
+}
+
+.heatmapBodyRow {
+  display: flex;
+  gap: 6px;
+}
+
+.heatmapDayLabels {
+  width: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 110px;
+  font-size: 9.5px;
+  color: var(--muted);
+  text-align: right;
+  padding-right: 4px;
+  user-select: none;
+}
+
+.heatmapDayLabels span {
+  height: 12px;
+  line-height: 12px;
+  display: block;
+}
+
+.heatmapColsWrap {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+}
+
+.heatmapCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.heatmapCell {
+  height: 13px;
+  border-radius: 3px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.1s ease, outline 0.1s ease, filter 0.15s ease;
+}
+
+.heatmapCell:hover {
+  transform: scale(1.2);
+  z-index: 5;
+  filter: brightness(1.25);
+}
+
+.heatmapCell.cellActive {
+  outline: 2px solid #ffffff;
+  outline-offset: -1px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  z-index: 4;
+}
+
+/* Dark theme square colors */
+.cellNeutral {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cellPosHigh {
+  background: #10b981;
+}
+.cellPosMed {
+  background: #059669;
+}
+.cellPosLow {
+  background: #064e3b;
+}
+
+.cellNegHigh {
+  background: #f87171;
+}
+.cellNegMed {
+  background: #dc2626;
+}
+.cellNegLow {
+  background: #450a0a;
+}
+
+/* Footer & Legend Bar */
+.dailyHeatmapFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11px;
+}
+
+.heatmapLegend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.legendTxt {
+  font-size: 10px;
+  color: var(--muted);
+  margin: 0 4px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.heatmapSummaryStats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 10.5px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--muted);
+}
+
+.statItemUp {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.statItemDown {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.statStreakUp {
+  color: #34d399;
+}
+
+.statStreakDown {
+  color: #fca5a5;
+}
+
+.heatmapFooterHovered {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--text);
+}
+
+.textPos {
+  color: #10b981;
+}
+
+.textNeg {
+  color: #f87171;
+}
+
+/* Light Mode Overrides for Daily Activity Heatmap */
+html[data-theme=light] .cellNeutral {
+  background: #e2e8f0 !important;
+}
+
+html[data-theme=light] .cellPosLow {
+  background: #a7f3d0 !important;
+}
+
+html[data-theme=light] .cellNegLow {
+  background: #fecaca !important;
+}
+
+html[data-theme=light] .heatmapCell.cellActive {
+  outline: 2px solid #0f172a !important;
+  box-shadow: 0 0 6px rgba(15, 23, 42, 0.35) !important;
+}
+
+html[data-theme=light] .dailyActivityCard {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+html[data-theme=light] .dailyActivityTitleBlock h2 {
+  color: #0f172a !important;
+}
+
+html[data-theme=light] .dailyHeatmapFooter {
+  border-top-color: #e2e8f0 !important;
+}
