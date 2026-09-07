@@ -470,8 +470,7 @@ function App(){
       <small>As of {fmtDate(displayDate)} &bull; Latest Released</small>
     </div>
     <div className="topbarRight">
-      <button className="iconBtn" onClick={()=>setDark(!dark)}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
-      <button className="themeBtn" onClick={()=>setDark(!dark)}>{dark?"Dark":"Light"}<ChevronDown size={15}/></button>
+      <button className="iconBtn" onClick={()=>setDark(!dark)} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
     </div>
   </header>
   <div className="body">
