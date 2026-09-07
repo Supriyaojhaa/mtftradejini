@@ -479,7 +479,6 @@ function App(){
     <Nav icon={<Search/>} text="Stock Screener" active={tab==="screener"} onClick={()=>setTab("screener")}/>
     <Nav icon={<PieIcon/>} text="Sectors & Map" active={tab==="sectors"} onClick={()=>setTab("sectors")}/>
     <Nav icon={<Calculator/>} text="Calculators" active={tab==="calc"} onClick={()=>setTab("calc")}/>
-    <div className="sideSpacer"/>
     <div className="insight">
       <span>MTF INSIGHT</span>
       <p>{pctCombined >= 0 ? "MTF book is up" : "MTF book is down"}</p>
@@ -505,6 +504,7 @@ function App(){
     </div>
     <Nav icon={<CircleHelp/>} text="About" active={tab==="about"} onClick={()=>setTab("about")}/>
     <Nav icon={<ShieldCheck/>} text="Methodology" active={tab==="methodology"} onClick={()=>setTab("methodology")}/>
+    <div className="sideSpacer"/>
    </aside>
    <main className="content">
     {tab === "screener" ? (

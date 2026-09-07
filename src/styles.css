@@ -6395,3 +6395,116 @@ html[data-theme=light] .quoteSyncBtn:hover {
   color: #1d4ed8;
 }
 
+/* ==========================================================================
+   SIDEBAR LAYOUT & BALANCED MARGINS
+   ========================================================================== */
+
+.sidebar {
+  width: 218px !important;
+  min-width: 218px !important;
+  padding: 10px 14px 20px 14px !important;
+  gap: 2px;
+}
+
+.content {
+  max-width: calc(100vw - 218px) !important;
+}
+
+.nav {
+  height: 44px;
+  padding: 0 12px;
+  gap: 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.nav:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.nav.active {
+  background: linear-gradient(90deg, rgba(38, 129, 255, 0.2), rgba(38, 129, 255, 0.05)) !important;
+  border: 1px solid rgba(38, 129, 255, 0.4) !important;
+  color: #fff !important;
+}
+
+.insight {
+  margin: 14px 0 12px 0 !important;
+  padding: 14px 14px 12px 14px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(38, 129, 255, 0.18) !important;
+  background: linear-gradient(145deg, #091424, #060e1b) !important;
+}
+
+.insight span {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #8da2be;
+  display: block;
+}
+
+.insight p {
+  margin: 8px 0 2px !important;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d1dced;
+}
+
+.insight strong {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 2px 0;
+}
+
+.insight small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.miniLine {
+  height: 44px !important;
+  margin: 8px -4px 6px -4px !important;
+}
+
+.sideSpacer {
+  flex: 1;
+  min-height: 16px;
+}
+
+html[data-theme=light] .sidebar {
+  background: #ffffff !important;
+  border-right-color: #e2e8f0 !important;
+}
+
+html[data-theme=light] .nav {
+  color: #475569;
+}
+
+html[data-theme=light] .nav:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+html[data-theme=light] .nav.active {
+  background: rgba(38, 129, 255, 0.1) !important;
+  border-color: rgba(38, 129, 255, 0.35) !important;
+  color: #1d4ed8 !important;
+}
+
+html[data-theme=light] .insight {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme=light] .insight span {
+  color: #64748b !important;
+}
+
+html[data-theme=light] .insight p {
+  color: #1e293b !important;
+}
+
