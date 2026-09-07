@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {createRoot} from "react-dom/client";
 import {AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, ReferenceLine} from "recharts";
-import {Home, Search, PanelLeftClose, PanelLeftOpen, PieChart as PieIcon, Calculator, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight} from "lucide-react";
+import {Home, Search, PanelLeftClose, PanelLeftOpen, PieChart as PieIcon, Calculator, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight, Menu, X} from "lucide-react";
 import ScreenerView from "./ScreenerView.jsx";
 import SectorsView from "./SectorsView.jsx";
 import CalculatorView from "./CalculatorView.jsx";
@@ -509,8 +509,12 @@ function App(){
 
  const [dark,setDark]=useState(true);
   const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
+  const [mobileNavOpen,setMobileNavOpen]=useState(false);
+  const [isMobile,setIsMobile]=useState(()=>(typeof window!=="undefined"?window.innerWidth<=780:false));
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 780);
+    window.addEventListener("resize", handleResize);
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
         e.preventDefault();
@@ -518,7 +522,10 @@ function App(){
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
  const [tab,setTab]=useState("overview");
  const [data,setData]=useState(null);
@@ -729,26 +736,58 @@ function App(){
  return <div className="app">
   <header className="topbar">
    <div className="brand">
-      <button 
-        className="sidebarToggleBtn" 
-        onClick={()=>setSidebarCollapsed(!sidebarCollapsed)} 
-        title={sidebarCollapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
-        aria-label="Toggle sidebar"
-      >
-        {sidebarCollapsed ? <PanelLeftOpen size={18}/> : <PanelLeftClose size={18}/>}
-      </button>
       <div className="brandMark"><span/><span/><span/><span/></div>
       <div><b>MTF ANALYTICS</b><small>India’s Margin Trading Intelligence</small></div>
     </div>
-    <div className="live" title="Feed connected and synced live from exchange records"><i/> LIVE FEED</div>
+    <div className="live" title="Feed connected and synced live from exchange records" aria-label="Live Feed"><i/></div>
     <div className="market" title="NSE and BSE publish aggregate MTF disclosures on a 1-2 day regulatory settlement lag. 02 Sept 2026 is the latest official disclosure released by the exchanges. Feed is synced live.">
       <span>EXCHANGE DISCLOSURE</span>
       <small>As of {fmtDate(displayDate)} &bull; Latest Released</small>
     </div>
     <div className="topbarRight">
       <button className="iconBtn" onClick={()=>setDark(!dark)} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
+      <button className="iconBtn mobileMenuBtn" onClick={()=>setMobileNavOpen(prev => !prev)} title="Toggle navigation menu" aria-label="Toggle navigation menu">
+        {mobileNavOpen ? <X size={19}/> : <Menu size={19}/>}
+      </button>
     </div>
   </header>
+   {/* Mobile Navigation Drawer & Backdrop */}
+   <div 
+     className={`mobileNavBackdrop ${mobileNavOpen ? "open" : ""}`} 
+     onClick={() => setMobileNavOpen(false)}
+     aria-hidden="true"
+   />
+   <aside className={`mobileNavDrawer ${mobileNavOpen ? "open" : ""}`} aria-label="Mobile Navigation Drawer">
+     <div className="mobileDrawerHeader">
+       <div className="brand">
+         <div className="brandMark"><span/><span/><span/><span/></div>
+         <div><b>MTF ANALYTICS</b><small>Navigation</small></div>
+       </div>
+       <button 
+         className="iconBtn mobileDrawerCloseBtn" 
+         onClick={() => setMobileNavOpen(false)}
+         aria-label="Close navigation"
+       >
+         <X size={18}/>
+       </button>
+     </div>
+     <div className="mobileDrawerNavList">
+       <Nav icon={<Home/>} text="Overview" active={tab==="overview"} onClick={()=>{setTab("overview"); setMobileNavOpen(false);}}/>
+       <Nav icon={<Search/>} text="Stock Screener" active={tab==="screener"} onClick={()=>{setTab("screener"); setMobileNavOpen(false);}}/>
+       <Nav icon={<PieIcon/>} text="Sectors & Map" active={tab==="sectors"} onClick={()=>{setTab("sectors"); setMobileNavOpen(false);}}/>
+       <Nav icon={<Calculator/>} text="Calculators" active={tab==="calc"} onClick={()=>{setTab("calc"); setMobileNavOpen(false);}}/>
+       <Nav icon={<CircleHelp/>} text="About" active={tab==="about"} onClick={()=>{setTab("about"); setMobileNavOpen(false);}}/>
+       <Nav icon={<ShieldCheck/>} text="Methodology" active={tab==="methodology"} onClick={()=>{setTab("methodology"); setMobileNavOpen(false);}}/>
+     </div>
+     <div className="insight" style={{marginTop: "auto", marginBottom: 0}}>
+       <span>MTF INSIGHT</span>
+       <p>{pctCombined >= 0 ? "MTF book is up" : "MTF book is down"}</p>
+       <strong style={{ color: pctCombined >= 0 ? "var(--green)" : "var(--red)" }}>
+         {pctCombined >= 0 ? "+" : ""}{pctCombined.toFixed(2)}%
+       </strong>
+       <small>today ({formatSignedCr(changeCombined)})</small>
+     </div>
+   </aside>
   <div className="body">
    <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
     <div className="sidebarTopToggleRow">
@@ -819,7 +858,7 @@ function App(){
            </div>
            <div className="chart big">
             <ResponsiveContainer width="100%" height={255}>
-              <AreaChart data={filteredHistory} margin={{top:10,right:10,left:0,bottom:0}}>
+              <AreaChart data={filteredHistory} margin={{top:10,right:isMobile?6:10,left:isMobile?-12:0,bottom:0}}>
                 <defs>
                   <linearGradient id="bluefill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#2580ff" stopOpacity=".45"/>
@@ -835,8 +874,26 @@ function App(){
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(16, 185, 129, 0.12)" strokeDasharray="2 3" vertical={false}/>
-                <XAxis dataKey="date" tickFormatter={(x)=>{if(!x)return "";if(period==="1M"||period==="3M")return x.slice(5);if(period==="6M"||period==="1Y")return x.slice(2,7);return x.slice(0,4);}} tick={{fill:"#7f8da5",fontSize:11}} axisLine={false} minTickGap={28}/>
-                <YAxis width={76} tickFormatter={(v)=>{const cr=v/100;return `₹${Math.round(cr).toLocaleString("en-IN")} Cr`;}} tick={{fill:"#7f8da5",fontSize:11}} axisLine={false} domain={period==="ALL"?[0,"auto"]:["auto","auto"]}/>
+                <XAxis dataKey="date" tickFormatter={(x)=>{if(!x)return "";if(period==="1M"||period==="3M")return x.slice(5);if(period==="6M"||period==="1Y")return x.slice(2,7);return x.slice(0,4);}} tick={{fill:"#7f8da5",fontSize:isMobile?10:11}} axisLine={false} minTickGap={28}/>
+                <YAxis
+                  width={isMobile ? 46 : 76}
+                  tickFormatter={(v)=>{
+                    const cr = Math.round(v / 100);
+                    if (cr === 0) return isMobile ? "0" : "₹0 Cr";
+                    if (!isMobile) {
+                      return `₹${cr.toLocaleString("en-IN")} Cr`;
+                    }
+                    if (cr >= 1000) {
+                      const k = cr / 1000;
+                      const s = k % 1 === 0 ? k.toFixed(0) : k.toFixed(1);
+                      return `${s}K Cr`;
+                    }
+                    return `${cr} Cr`;
+                  }}
+                  tick={{fill:"#7f8da5",fontSize:isMobile?10:11}}
+                  axisLine={false}
+                  domain={period==="ALL"?[0,"auto"]:["auto","auto"]}
+                />
                 <Tooltip contentStyle={{background:"rgba(6, 26, 20, 0.94)",backdropFilter:"blur(10px)",border:"1px solid rgba(16, 185, 129, 0.3)",borderRadius:10,color:"#f9fafb",fontSize:12}} labelFormatter={(label)=>fmtDate(label)} formatter={(v,name)=>[formatExactCr(v),name==="combined"?"Total MTF Book":name==="nse"?"NSE Book":name==="bse"?"BSE Book":name]}/>
                 {exchange==="ALL"?(
                   <>
@@ -1160,7 +1217,8 @@ function App(){
     <footer><span>Data source: NSE / BSE MTF disclosures</span><i/> <span>Processed via MTF Analytics public data endpoints</span><span className="footRight">All values in ₹ (INR) &nbsp;|&nbsp; Lakh = 100,000 &nbsp;|&nbsp; Crore = 10,000,000</span></footer>
    </main>
   </div>
-  {loading&&<div className="loading"><div className="spinner"/>Loading live market data…</div>}
+
+{loading&&<div className="loading"><div className="spinner"/>Loading live market data…</div>}
  </div>
 }
 function Nav({icon,text,active,badge,onClick}){
@@ -1203,13 +1261,16 @@ function Kpi({title,value,delta,pct,subtitle,icon,chart,keyName="combined"}){
 
   return (
     <section className="card kpi">
-      <div className="kpiIcon">{React.cloneElement(icon, { size: 20 })}</div>
-      <div className="kpiTitle">{title}</div>
+      <div className="kpiHeader">
+        <div className="kpiIcon">{React.cloneElement(icon, { size: 18 })}</div>
+        <div className="kpiTitle">{title}</div>
+      </div>
       <div className="kpiValue">{value}</div>
       {delta != null ? (
         <div className={`kpiDelta ${delta >= 0 ? "positive" : "negative"}`}>
-          {delta >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-          {delta >= 0 ? "+" : "-"}{formatExactCr(Math.abs(delta))} <b>({pct >= 0 ? "+" : ""}{pct.toFixed(2)}%)</b>
+          {delta >= 0 ? <ArrowUpRight size={15} /> : <ArrowDownRight size={15} />}
+          <span>{delta >= 0 ? "+" : "-"}{formatExactCr(Math.abs(delta))}</span>
+          <b>({pct >= 0 ? "+" : ""}{pct.toFixed(2)}%)</b>
         </div>
       ) : null}
       <small>{subtitle || "vs previous period"}</small>

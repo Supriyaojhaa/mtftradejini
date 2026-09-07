@@ -6566,14 +6566,28 @@ body {
 }
 
 .live {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
   background: rgba(16, 185, 129, 0.14) !important;
   border: 1px solid rgba(16, 185, 129, 0.32) !important;
   color: #34d399 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.15) !important;
+  cursor: help !important;
 }
 
 .live i {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
   background: #10b981 !important;
-  box-shadow: 0 0 10px #10b981 !important;
+  box-shadow: 0 0 8px #10b981, 0 0 14px rgba(16, 185, 129, 0.5) !important;
+  margin: 0 !important;
+  display: block !important;
 }
 
 /* Sidebar */
@@ -7602,4 +7616,577 @@ html[data-theme=light] .dailyActivityTitleBlock h2 {
 
 html[data-theme=light] .dailyHeatmapFooter {
   border-top-color: #e2e8f0 !important;
+}
+
+
+/* ==========================================================================
+   MOBILE NAVIGATION (DRAWER & BOTTOM APP BAR)
+   ========================================================================== */
+
+.mobileMenuBtn {
+  display: none;
+}
+
+.mobileNavBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 105;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.mobileNavBackdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobileNavDrawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(300px, 84vw);
+  background: var(--panel2);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--border);
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px;
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 0 28px rgba(0, 0, 0, 0.55);
+  overflow-y: auto;
+}
+
+.mobileNavDrawer.open {
+  transform: translateX(0);
+}
+
+.mobileDrawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobileDrawerHeader .brand {
+  width: auto;
+  gap: 10px;
+}
+
+.mobileDrawerCloseBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.mobileDrawerNavList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Mobile Media Query (<= 780px) */
+@media (max-width: 780px) {
+  .mobileMenuBtn {
+    display: grid !important;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    margin-left: 6px;
+  }
+}
+
+/* Light Mode Overrides for Mobile Navigation */
+html[data-theme=light] .mobileNavDrawer {
+  background: #ffffff !important;
+  border-right-color: #e2e8f0 !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+html[data-theme=light] .mobileDrawerHeader {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+
+/* ==========================================================================
+   UNIVERSAL RESPONSIVE STYLES FOR ALL DEVICE RATIOS
+   ========================================================================== */
+
+/* Topbar Base */
+.topbar {
+  height: 60px !important;
+  min-height: 60px !important;
+  padding: 0 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 90 !important;
+}
+
+.brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.topbarRight {
+  margin-left: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+/* KPI Card Structure - Flexible & Collision-Free */
+.heroGrid {
+  display: grid !important;
+  grid-template-columns: 1.65fr 1fr 1fr 1fr !important;
+  gap: 14px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.kpi {
+  min-height: 146px !important;
+  padding: 16px 18px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.kpiHeader {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 6px !important;
+  position: static !important;
+}
+
+.kpiTitle {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--muted) !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+  flex: 1 !important;
+}
+
+.kpiValue {
+  position: static !important;
+  font-size: clamp(20px, 3.2vw, 24px) !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  letter-spacing: -0.02em !important;
+  margin: 4px 0 6px 0 !important;
+  font-family: "IBM Plex Mono", monospace !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.2 !important;
+}
+
+.kpiDelta {
+  font-family: "IBM Plex Mono", monospace !important;
+  font-size: 11.5px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  flex-wrap: wrap !important;
+  z-index: 2 !important;
+  position: relative !important;
+}
+
+.kpiChart {
+  position: absolute !important;
+  right: 6px !important;
+  bottom: 6px !important;
+  width: 44% !important;
+  height: 64px !important;
+  pointer-events: none !important;
+  opacity: 0.85 !important;
+  z-index: 1 !important;
+}
+
+.kpi>small {
+  z-index: 2 !important;
+  position: relative !important;
+}
+
+/* TABLET BREAKPOINT (<= 1150px) */
+@media (max-width: 1150px) {
+  .heroGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .metricGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+/* MOBILE & NARROW BREAKPOINT (<= 900px) */
+@media (max-width: 900px) {
+  .body {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .market {
+    display: none !important;
+  }
+
+  .kpiChart {
+    display: none !important;
+  }
+
+  .kpi {
+    min-height: auto !important;
+  }
+
+  .content,
+  .content.expanded {
+    max-width: 100vw !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 14px 14px 32px 14px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .mobileMenuBtn {
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .grid3 {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
+  .grid3 > .chartCard {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .cardHead {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .controls {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 6px !important;
+  }
+
+  .flowControlsRow {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 6px !important;
+  }
+
+  .flowMetaBar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .compContainer {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .compDonutSide {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+
+  .compBreakdownList {
+    width: 100% !important;
+  }
+
+  .tableHead {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .tableTools {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .tableSearch {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+}
+
+/* SMALL PHONES BREAKPOINT (<= 640px) */
+@media (max-width: 640px) {
+  .heroGrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .metricGrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .content,
+  .content.expanded {
+    padding: 12px 10px 24px 10px !important;
+  }
+
+  .kpi {
+    min-height: 136px !important;
+    padding: 14px 16px !important;
+  }
+
+  .kpiValue {
+    font-size: 21px !important;
+  }
+}
+
+/* ULTRA COMPACT PHONES (<= 460px) */
+@media (max-width: 460px) {
+  .topbar {
+    padding: 0 10px !important;
+  }
+  .brand {
+    gap: 8px !important;
+  }
+  .brand small {
+    display: none !important;
+  }
+  .brand b {
+    font-size: 13.5px !important;
+  }
+  .brandMark {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .live {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    padding: 0 !important;
+  }
+  .iconBtn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+  .screenerHeading {
+    font-size: 17px !important;
+  }
+}
+
+
+/* Treemap PC vs Mobile Text Classes */
+.nameFull { display: inline; }
+.nameShort { display: none; }
+.valFull { display: inline; }
+.valMobile { display: none; }
+.labelFull { display: inline; }
+.labelMobile { display: none; }
+
+@media (max-width: 780px) {
+  .nameFull { display: none !important; }
+  .nameShort { display: inline !important; }
+  .valFull { display: none !important; }
+  .valMobile { display: inline !important; }
+  .labelFull { display: none !important; }
+  .labelMobile { display: inline !important; }
+
+  /* Transform mobile treemap into a balanced, high-legibility Heatmap Card Matrix */
+  .treemapContainer {
+    position: relative !important;
+    height: auto !important;
+    min-height: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .treemapTile {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .treemapTile:hover {
+    transform: translateY(-1px) !important;
+    z-index: 2 !important;
+  }
+
+  /* #1 Market Sector (Banking) spans 2 columns as a Hero Card for visual balance & hierarchy */
+  .treemapTile:first-child {
+    grid-column: span 2 !important;
+  }
+
+  .treemapTile:first-child .treemapTileInner {
+    padding: 12px 14px !important;
+    min-height: 92px !important;
+  }
+
+  .treemapTile:first-child .tileSectorName {
+    font-size: 13.5px !important;
+  }
+
+  .treemapTile:first-child .tileBookCr {
+    font-size: 17px !important;
+  }
+
+  .treemapTile:first-child .tileChangePill {
+    font-size: 11px !important;
+    padding: 2px 7px !important;
+  }
+
+  /* Standard 2-column tiles */
+  .treemapTileInner {
+    padding: 10px 11px !important;
+    border-radius: 8px !important;
+    min-height: 86px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .tileHeader {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 18px !important;
+  }
+
+  .tileTitleRow {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .tileIconBox {
+    display: grid !important;
+    place-items: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .tileIconBox svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .tileSectorName {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .tileShareBadge {
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    padding: 2px 5px !important;
+    border-radius: 4px !important;
+    flex-shrink: 0 !important;
+    font-family: "IBM Plex Mono", monospace !important;
+  }
+
+  .tileValueRow {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+    margin: 2px 0 !important;
+  }
+
+  .tileBookCr {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    white-space: nowrap !important;
+    font-family: "IBM Plex Mono", monospace !important;
+  }
+
+  .tileChangePill {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    flex-shrink: 0 !important;
+    font-family: "IBM Plex Mono", monospace !important;
+  }
+
+  .tileFooter {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding-top: 5px !important;
+    margin-top: 0 !important;
+    border-top-width: 1px !important;
+    border-top-style: solid !important;
+    font-size: 9.5px !important;
+  }
+
+  .tileFfLev {
+    font-size: 9.5px !important;
+    white-space: nowrap !important;
+  }
+
+  .tileFfLev b {
+    font-size: 9.5px !important;
+  }
+
+  .tileStockCount {
+    font-size: 9.5px !important;
+    white-space: nowrap !important;
+    opacity: 0.85 !important;
+  }
 }

@@ -51,6 +51,7 @@ import StockDrawer from "./StockDrawer";
 // Sector visual mapping and metadata
 const SECTOR_CONFIG = {
   "Banking & Financials": {
+    shortName: "Banking",
     icon: Landmark,
     color: "#3b82f6",
     accentBg: "rgba(59, 130, 246, 0.12)",
@@ -58,6 +59,7 @@ const SECTOR_CONFIG = {
     desc: "Private & PSU banks, NBFCs, and financial exchanges",
   },
   "Industrials & Infra": {
+    shortName: "Industrials",
     icon: Building,
     color: "#f59e0b",
     accentBg: "rgba(245, 158, 11, 0.12)",
@@ -65,6 +67,7 @@ const SECTOR_CONFIG = {
     desc: "Capital goods, defense electronics, and infrastructure",
   },
   "Energy & Utilities": {
+    shortName: "Energy",
     icon: Flame,
     color: "#f97316",
     accentBg: "rgba(249, 115, 22, 0.12)",
@@ -72,6 +75,7 @@ const SECTOR_CONFIG = {
     desc: "Oil, gas, thermal, wind, and solar power generation",
   },
   "Information Tech": {
+    shortName: "IT / Tech",
     icon: Cpu,
     color: "#06b6d4",
     accentBg: "rgba(6, 182, 212, 0.12)",
@@ -79,6 +83,7 @@ const SECTOR_CONFIG = {
     desc: "IT software, digital services, and electronics EMS",
   },
   "FMCG & Consumer": {
+    shortName: "FMCG",
     icon: ShoppingBag,
     color: "#10b981",
     accentBg: "rgba(16, 185, 129, 0.12)",
@@ -86,6 +91,7 @@ const SECTOR_CONFIG = {
     desc: "Staples, quick commerce, food delivery, and retail chains",
   },
   "Automotive & EV": {
+    shortName: "Auto",
     icon: Car,
     color: "#8b5cf6",
     accentBg: "rgba(139, 92, 246, 0.12)",
@@ -93,6 +99,7 @@ const SECTOR_CONFIG = {
     desc: "Passenger cars, commercial vehicles, and auto ancillaries",
   },
   "Healthcare & Pharma": {
+    shortName: "Pharma",
     icon: HeartPulse,
     color: "#ec4899",
     accentBg: "rgba(236, 72, 153, 0.12)",
@@ -100,6 +107,7 @@ const SECTOR_CONFIG = {
     desc: "Active pharma ingredients, biotech, and diagnostics",
   },
   "Telecom & Media": {
+    shortName: "Telecom",
     icon: Radio,
     color: "#0ea5e9",
     accentBg: "rgba(14, 165, 233, 0.12)",
@@ -107,6 +115,7 @@ const SECTOR_CONFIG = {
     desc: "Telecommunications network, broadband, and digital gaming",
   },
   "Metals & Mining": {
+    shortName: "Metals",
     icon: Layers,
     color: "#a855f7",
     accentBg: "rgba(168, 85, 247, 0.12)",
@@ -114,6 +123,7 @@ const SECTOR_CONFIG = {
     desc: "Primary steel, aluminum, copper, and coal extraction",
   },
   "Real Estate & Construction": {
+    shortName: "Realty",
     icon: Building2,
     color: "#eab308",
     accentBg: "rgba(234, 179, 8, 0.12)",
@@ -121,6 +131,7 @@ const SECTOR_CONFIG = {
     desc: "Commercial developers, residential realtors, and cement",
   },
   "Exchange Traded Funds": {
+    shortName: "ETFs",
     icon: Activity,
     color: "#64748b",
     accentBg: "rgba(100, 116, 139, 0.12)",
@@ -1100,10 +1111,11 @@ export default function SectorsView({ onBack }) {
                     <div className="tileHeader">
                       <div className="tileTitleRow">
                         <div className="tileIconBox" style={{ color: tile.config.color }}>
-                          <IconComp size={15} />
+                          <IconComp size={14} />
                         </div>
                         <span className="tileSectorName" style={{ color: bgStyle.textColor }}>
-                          {tile.name}
+                          <span className="nameFull">{tile.name}</span>
+                          <span className="nameShort">{tile.config?.shortName || tile.name}</span>
                         </span>
                       </div>
                       <span
@@ -1117,7 +1129,8 @@ export default function SectorsView({ onBack }) {
                     {/* Tile Center: Total MTF Book (₹ Cr) */}
                     <div className="tileValueRow">
                       <b className="tileBookCr" style={{ color: bgStyle.textColor }}>
-                        {formatExactCr(tile.bookCr)}
+                        <span className="valFull">{formatExactCr(tile.bookCr)}</span>
+                        <span className="valMobile">₹{Math.round(tile.bookCr).toLocaleString("en-IN")} Cr</span>
                       </b>
                       <span
                         className="tileChangePill"
@@ -1135,10 +1148,13 @@ export default function SectorsView({ onBack }) {
                     {/* Tile Footer: MTF/FF ratio & Stock Count */}
                     <div className="tileFooter" style={{ borderTopColor: bgStyle.footerBorder, color: bgStyle.subColor }}>
                       <span className="tileFfLev" style={{ color: bgStyle.subColor }}>
-                        FF Lev: <b style={{ color: bgStyle.textColor }}>{tile.ffLevPct}%</b>
+                        <span className="labelFull">FF Lev: </span>
+                        <span className="labelMobile">Lev: </span>
+                        <b style={{ color: bgStyle.textColor }}>{tile.ffLevPct}%</b>
                       </span>
                       <span className="tileStockCount" style={{ color: bgStyle.subColor }}>
-                        {tile.stockCount} Stocks
+                        <span className="labelFull">{tile.stockCount} Stocks</span>
+                        <span className="labelMobile">{tile.stockCount} Stk</span>
                       </span>
                     </div>
                   </div>
