@@ -3,6 +3,9 @@ import {createRoot} from "react-dom/client";
 import {AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, ReferenceLine} from "recharts";
 import {Home, Search, PieChart as PieIcon, Calculator, Send, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight} from "lucide-react";
 import ScreenerView from "./ScreenerView.jsx";
+import SectorsView from "./SectorsView.jsx";
+import CalculatorView from "./CalculatorView.jsx";
+import AboutMethodologyView from "./AboutMethodologyView.jsx";
 import "./styles.css";
 
 const API="https://mtf.trading";
@@ -164,8 +167,20 @@ function normalizeComp(raw){
 }
 function formatExactCr(lakh, decimals = 2) {
   if (lakh == null || isNaN(lakh)) return "₹0.00 Cr";
-  const cr = Number(lakh) / 100;
-  return `₹${cr.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} Cr`;
+  const num = Number(lakh);
+  const isNeg = num < 0;
+  const cr = Math.abs(num) / 100;
+  const str = cr.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return `${isNeg ? "-" : ""}₹${str} Cr`;
+}
+function formatSignedCr(lakh, decimals = 2) {
+  if (lakh == null || isNaN(lakh)) return "₹0.00 Cr";
+  const num = Number(lakh);
+  if (num === 0) return "₹0.00 Cr";
+  const sign = num > 0 ? "+" : "-";
+  const cr = Math.abs(num) / 100;
+  const str = cr.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return `${sign}₹${str} Cr`;
 }
 function formatCr(lakh){return formatExactCr(lakh, 2);}
 function shortCr(lakh){return formatExactCr(lakh, 2);}
@@ -184,27 +199,12 @@ function KpiMiniTooltip({ active, payload, strokeColor }) {
   if (val == null) return null;
   const dateStr = d?.date ? fmtDate(d.date) : "";
   return (
-    <div style={{
-      background: "rgba(10, 19, 34, 0.96)",
-      border: "1px solid #223552",
-      borderRadius: 7,
-      padding: "5px 9px",
-      boxShadow: "0 6px 18px rgba(0,0,0,0.6)",
-      pointerEvents: "none",
-      whiteSpace: "nowrap",
-      textAlign: "center"
-    }}>
-      <div style={{
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: "13px",
-        fontWeight: 700,
-        color: strokeColor || "#fff",
-        letterSpacing: "-0.2px"
-      }}>
+    <div className="kpiMiniTooltipBox">
+      <div className="kpiMiniTooltipVal" style={{ color: strokeColor || "#fff" }}>
         {formatExactCr(val)}
       </div>
       {dateStr ? (
-        <div style={{ color: "#8a97aa", fontSize: "10px", marginTop: "2px" }}>
+        <div className="kpiMiniTooltipDate">
           {dateStr}
         </div>
       ) : null}
@@ -244,7 +244,7 @@ function CustomFlowTooltip({active, payload}){
         <div className="flowTooltipRow netRow">
           <span className="flowTooltipItem"><b>Net Daily Shift</b></span>
           <b className={`flowTooltipVal ${isPositive ? "positive" : "negative"}`}>
-            {isPositive ? "+" : ""}{formatExactCr(net)}
+            {formatSignedCr(net)}
           </b>
         </div>
       </div>
@@ -481,25 +481,41 @@ function App(){
     <Nav icon={<Calculator/>} text="Calculators" active={tab==="calc"} onClick={()=>setTab("calc")}/>
     <Nav icon={<Send/>} text="Broker Share" badge="Soon"/>
     <div className="sideSpacer"/>
-    <div className="insight"><span>MTF INSIGHT</span><p>MTF book is up</p><strong>+{pctCombined.toFixed(2)}%</strong><small>today (+{formatExactCr(changeCombined)})</small><div className="miniLine"><ResponsiveContainer width="100%" height={48}><AreaChart data={history.slice(-30)} margin={{top:4,bottom:0,left:0,right:0}}><defs><linearGradient id="sideInsightGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#16d98a" stopOpacity={0.4}/><stop offset="100%" stopColor="#16d98a" stopOpacity={0}/></linearGradient></defs><YAxis hide domain={['dataMin','dataMax']}/><Area type="monotone" dataKey="combined" dot={false} stroke="#16d98a" strokeWidth={2} fill="url(#sideInsightGrad)"/></AreaChart></ResponsiveContainer></div><small>vs {fmtDate(previous.date)}</small></div>
-    <div className="sideDownload"><Download size={17}/><div><b>Download Data</b><span>Get all datasets</span></div></div>
-    <Nav icon={<CircleHelp/>} text="About"/><Nav icon={<ShieldCheck/>} text="Methodology"/>
+    <div className="insight">
+      <span>MTF INSIGHT</span>
+      <p>{pctCombined >= 0 ? "MTF book is up" : "MTF book is down"}</p>
+      <strong style={{ color: pctCombined >= 0 ? "var(--green)" : "var(--red)" }}>
+        {pctCombined >= 0 ? "+" : ""}{pctCombined.toFixed(2)}%
+      </strong>
+      <small>today ({formatSignedCr(changeCombined)})</small>
+      <div className="miniLine">
+        <ResponsiveContainer width="100%" height={48}>
+          <AreaChart data={history.slice(-30)} margin={{top:4,bottom:0,left:0,right:0}}>
+            <defs>
+              <linearGradient id="sideInsightGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={pctCombined >= 0 ? "#16d98a" : "#ff4d5c"} stopOpacity={0.4}/>
+                <stop offset="100%" stopColor={pctCombined >= 0 ? "#16d98a" : "#ff4d5c"} stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <YAxis hide domain={['dataMin','dataMax']}/>
+            <Area type="monotone" dataKey="combined" dot={false} stroke={pctCombined >= 0 ? "#16d98a" : "#ff4d5c"} strokeWidth={2} fill="url(#sideInsightGrad)"/>
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+      <small>vs {fmtDate(previous.date)}</small>
+    </div>
+    <Nav icon={<CircleHelp/>} text="About" active={tab==="about"} onClick={()=>setTab("about")}/>
+    <Nav icon={<ShieldCheck/>} text="Methodology" active={tab==="methodology"} onClick={()=>setTab("methodology")}/>
    </aside>
    <main className="content">
     {tab === "screener" ? (
       <ScreenerView onSelectStockInOverview={(stock) => {}} />
     ) : tab === "sectors" ? (
-      <div className="card" style={{padding: 24}}>
-        <h2>Sectors & Market Map</h2>
-        <p style={{color: "var(--muted)"}}>Deep-dive into sector-level retail crowding, free-float leverage, and industry concentration.</p>
-        <button className="btn" style={{marginTop: 12}} onClick={()=>setTab("screener")}>Back to Screener</button>
-      </div>
+      <SectorsView onBack={() => setTab("screener")} />
     ) : tab === "calc" ? (
-      <div className="card" style={{padding: 24}}>
-        <h2>MTF Leverage & Carry Calculator</h2>
-        <p style={{color: "var(--muted)"}}>Model position carry, margin call thresholds, and holding break-evens.</p>
-        <button className="btn" style={{marginTop: 12}} onClick={()=>setTab("screener")}>Back to Screener</button>
-      </div>
+      <CalculatorView onBack={() => setTab("screener")} />
+    ) : tab === "about" || tab === "methodology" ? (
+      <AboutMethodologyView initialTab={tab} onNavigate={setTab} />
     ) : (
       <>
         <div className="heroGrid">
@@ -618,7 +634,7 @@ function App(){
                 </span>
                 <span className={`flowPill netPill ${flowStats.netTotal >= 0 ? "positive" : "negative"}`}>
                   <span className="flowPillLbl">Net Flow:</span>
-                  <b>{flowStats.netTotal >= 0 ? "+" : ""}{formatExactCr(flowStats.netTotal)}</b>
+                  <b>{formatSignedCr(flowStats.netTotal)}</b>
                 </span>
                 {flowStats.flushCount > 0 && (
                   <span className="flowPill flushPill">
@@ -848,7 +864,7 @@ function App(){
           </section>
         </div>
         <div className="metricGrid">
-          <Metric title="LATEST 1D NET FLOW" value={`${(latestNetFlow >= 0 ? "+" : "") + formatExactCr(latestNetFlow)}`} sub={`Net shift on ${fmtDate(displayDate)}`} icon={<TrendingUp/>}/>
+          <Metric title="LATEST 1D NET FLOW" value={formatSignedCr(latestNetFlow)} sub={`Net shift on ${fmtDate(displayDate)}`} icon={<TrendingUp/>}/>
           <Metric title="MTF EXPOSURE (1D)" value={fmtPct(pctCombined)} sub={`vs ${fmtDate(previous.date)}`} icon={<Activity/>}/>
           <Metric title="FLUSH EVENTS (30D)" value={String(flushCount30D)} sub={lastFlush ? `0 in 30D (Last: ${fmtDate(lastFlush.date)})` : "High liquidation days"} icon={<CalendarDays/>}/>
           <Metric title="AVG LEVERAGE" value={`${avgLeverage.toFixed(2)}%`} sub="Across active stocks" icon={<PieIcon/>}/>

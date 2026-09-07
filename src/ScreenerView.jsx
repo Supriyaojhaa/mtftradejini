@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   AreaChart,
   Area,
@@ -20,6 +20,8 @@ import {
   BarChart2,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Sparkles,
   RotateCcw,
   Star,
@@ -32,9 +34,12 @@ import {
   ShieldAlert,
   Target,
   FileSpreadsheet,
+  X,
+  Filter,
 } from "lucide-react";
 import { enrichStock } from "./stockDataEnricher";
 import StockDrawer from "./StockDrawer";
+import { useLiveQuotes } from "./hooks/useLiveQuotes.js";
 
 // Fallback universe
 const FALLBACK_RAW_STOCKS = [
@@ -114,6 +119,11 @@ export default function ScreenerView() {
 
   // Selected stock for top chart & drawer
   const [selectedStock, setSelectedStock] = useState(null);
+  const [showTopChart, setShowTopChart] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const searchInputRef = useRef(null);
+  const presetScrollRef = useRef(null);
+
   const [drawerStock, setDrawerStock] = useState(null);
   const [stockHistory, setStockHistory] = useState([]);
   const [chartPeriod, setChartPeriod] = useState("1Y");
@@ -185,6 +195,60 @@ export default function ScreenerView() {
 
   const deleteAlert = (id) => {
     setAlerts((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  // Keyboard shortcut Ctrl+K to quickly focus search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const scrollPreset = (direction) => {
+    if (presetScrollRef.current) {
+      const scrollAmount = direction === "left" ? -240 : 240;
+      presetScrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (exchange !== "ALL") count++;
+    if (indexFilter !== "ALL") count++;
+    if (sectorFilter !== "ALL") count++;
+    if (capTierFilter !== "ALL") count++;
+    if (patternFilter !== "ALL") count++;
+    if (analystFilter !== "ALL") count++;
+    if (minBookFilter > 0) count++;
+    return count;
+  }, [exchange, indexFilter, sectorFilter, capTierFilter, patternFilter, analystFilter, minBookFilter]);
+
+  const isAnyFilterActive = useMemo(() => {
+    return Boolean(
+      search ||
+      activeFilterCount > 0 ||
+      preset !== "all" ||
+      activeCustomScreen !== null
+    );
+  }, [search, activeFilterCount, preset, activeCustomScreen]);
+
+  const resetAllFilters = () => {
+    setSearch("");
+    setExchange("ALL");
+    setIndexFilter("ALL");
+    setSectorFilter("ALL");
+    setCapTierFilter("ALL");
+    setPatternFilter("ALL");
+    setAnalystFilter("ALL");
+    setPreset("all");
+    setActiveCustomScreen(null);
+    setMinBookFilter(0);
+    setPage(1);
   };
 
   // Load universe
@@ -387,6 +451,28 @@ export default function ScreenerView() {
     return filteredStocks.slice(start, start + rowsPerPage);
   }, [filteredStocks, page, rowsPerPage]);
 
+  // Live market quotes for selected stock, drawer stock, and visible page rows
+  const liveWatchSymbols = useMemo(() => {
+    const syms = new Set();
+    if (selectedStock?.symbol) syms.add(selectedStock.symbol);
+    if (drawerStock?.symbol) syms.add(drawerStock.symbol);
+    if (Array.isArray(pageRows)) {
+      pageRows.forEach((s) => {
+        if (s && s.symbol) syms.add(s.symbol);
+      });
+    }
+    return Array.from(syms);
+  }, [selectedStock, drawerStock, pageRows]);
+
+  const {
+    quotes: liveQuotes,
+    loading: liveQuotesLoading,
+    isLive: isQuotesLive,
+    isStreaming: isQuotesStreaming,
+    priceTicks,
+    refetch: refetchLiveQuotes,
+  } = useLiveQuotes(liveWatchSymbols, { enableSSE: true, pollIntervalMs: 15000 });
+
   const handleSort = (key) => {
     if (sortKey === key) {
       setSortAsc(!sortAsc);
@@ -506,6 +592,23 @@ export default function ScreenerView() {
             <span className="screenerBadge universeBadge">
               <Sparkles size={13} /> {stocks.length.toLocaleString("en-IN")} Multi-Asset Universe
             </span>
+            <span
+              className={`calcFeedBadge ${isQuotesLive ? "live" : "offline"}`}
+              title={
+                isQuotesStreaming
+                  ? "Real-time SSE push stream active"
+                  : isQuotesLive
+                  ? "Polling live quotes"
+                  : "Local simulation mode"
+              }
+            >
+              <span className={`livePulseDot ${isQuotesLive ? "" : "offlineDot"}`} />
+              {isQuotesStreaming
+                ? "• SSE LIVE STREAM"
+                : isQuotesLive
+                ? "• LIVE QUOTES"
+                : "LOCAL CACHE"}
+            </span>
             {watchlist.length > 0 && (
               <span className="watchlistCountBadge" onClick={() => setPreset("watchlist")}>
                 <Star size={12} fill="#f59e0b" color="#f59e0b" /> {watchlist.length} Starred
@@ -585,7 +688,8 @@ export default function ScreenerView() {
       </div>
 
       {/* 3. Selected Stock Deep-Dive Chart Bar */}
-      {selectedStock && (
+      {/* 3. Selected Stock Deep-Dive Chart Bar (Collapsible) */}
+      {selectedStock && showTopChart && (
         <section className="card screenerChartCard">
           <div className="stockDetailHeader">
             <div className="stockInfoBlock">
@@ -609,9 +713,19 @@ export default function ScreenerView() {
             </div>
 
             <div className="stockMetricsRow">
-              <div className="stockMetricItem">
-                <span className="stockMetricLabel">PRICE</span>
-                <strong className="stockMetricVal">₹{selectedStock.currentPrice}</strong>
+              <div
+                className={`stockMetricItem ${
+                  priceTicks[selectedStock.symbol] ? `tick-${priceTicks[selectedStock.symbol]}` : ""
+                }`}
+              >
+                <span className="stockMetricLabel">
+                  PRICE {liveQuotes[selectedStock.symbol] && <span className="liveDotMini" title="Live Market Feed" />}
+                </span>
+                <strong className="stockMetricVal">
+                  ₹{Number(
+                    liveQuotes[selectedStock.symbol]?.cmp ?? selectedStock.currentPrice
+                  ).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </strong>
               </div>
 
               <div className="stockMetricItem">
@@ -645,13 +759,22 @@ export default function ScreenerView() {
                 </strong>
               </div>
 
-              <button
-                className="btn deepDiveBtn"
-                onClick={() => setDrawerStock(selectedStock)}
-                title="View Full Financial Statements & Analysis"
-              >
-                <Eye size={14} /> Full Deep Dive
-              </button>
+              <div className="chartActionsGroup">
+                <button
+                  className="btn deepDiveBtn"
+                  onClick={() => setDrawerStock(selectedStock)}
+                  title="View Full Financial Statements & Analysis"
+                >
+                  <Eye size={14} /> Full Deep Dive
+                </button>
+                <button
+                  className="btn secondary chartDismissBtn"
+                  onClick={() => setShowTopChart(false)}
+                  title="Hide chart to maximize table space"
+                >
+                  <X size={13} /> Hide Chart
+                </button>
+              </div>
             </div>
 
             <div className="chartPeriodControls">
@@ -721,132 +844,53 @@ export default function ScreenerView() {
         </section>
       )}
 
-      {/* 4. Controls, Presets & Multi-Metric Filter Bar */}
-      <div className="card screenerControlCard">
-        {/* Preset Tabs */}
-        <div className="presetTabsRow">
-          <button
-            className={`presetTab ${preset === "all" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("all");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            All Securities
-          </button>
-          <button
-            className={`presetTab ${preset === "undervalued" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("undervalued");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            💎 Undervalued Growth
-          </button>
-          <button
-            className={`presetTab ${preset === "high_dividend" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("high_dividend");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            💰 High Dividend Yield
-          </button>
-          <button
-            className={`presetTab ${preset === "momentum" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("momentum");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            🚀 Breakout Momentum
-          </button>
-          <button
-            className={`presetTab ${preset === "oversold" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("oversold");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            ⚡ RSI Oversold Bounce
-          </button>
-          <button
-            className={`presetTab ${preset === "low_debt" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("low_debt");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            🛡️ Low-Debt Quality
-          </button>
-          <button
-            className={`presetTab ${preset === "squeeze" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("squeeze");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            ⚠️ Margin Squeeze Risk
-          </button>
-          <button
-            className={`presetTab ${preset === "mtf_accum" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("mtf_accum");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            📈 30D MTF Accumulation
-          </button>
-          <button
-            className={`presetTab ${preset === "watchlist" ? "active" : ""}`}
-            onClick={() => {
-              setPreset("watchlist");
-              setActiveCustomScreen(null);
-              setPage(1);
-            }}
-          >
-            ⭐ Watchlist ({watchlist.length})
-          </button>
-
-          {/* User's custom screens */}
-          {customScreens.map((cs) => (
-            <div key={cs.id} className="customScreenPillWrap">
-              <button
-                className={`presetTab ${activeCustomScreen?.id === cs.id ? "active" : ""}`}
-                onClick={() => {
-                  setActiveCustomScreen(cs);
-                  setPreset("custom");
-                  setPage(1);
-                }}
-              >
-                ⚙️ {cs.name}
-              </button>
-              <button
-                className="deleteCustomPillBtn"
-                onClick={(e) => handleDeleteCustomScreen(cs.id, e)}
-                title="Delete this screen"
-              >
-                ×
-              </button>
-            </div>
-          ))}
+      {selectedStock && !showTopChart && (
+        <div className="miniChartStrip card">
+          <div className="miniChartInfo">
+            <span className={`exchangeBadge badge-${(selectedStock.exchange || "NSE").toLowerCase()}`}>
+              {selectedStock.exchange || "NSE"}
+            </span>
+            <span className="miniChartStockName">
+              <b>{selectedStock.name || selectedStock.symbol}</b> ({selectedStock.symbol})
+            </span>
+            <span
+              className={`miniChartPrice ${
+                priceTicks[selectedStock.symbol] ? `tick-${priceTicks[selectedStock.symbol]}` : ""
+              }`}
+            >
+              ₹{Number(
+                liveQuotes[selectedStock.symbol]?.cmp ?? selectedStock.currentPrice
+              ).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {liveQuotes[selectedStock.symbol] && <span className="liveDotMini" title="Live Market Feed" />}
+            </span>
+            <span className="miniChartBook">
+              MTF Book: ₹{Number(selectedStock.bookCr).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr
+            </span>
+            <span className={`miniChartDelta ${(selectedStock.change_30d_pct || 0) >= 0 ? "positive" : "negative"}`}>
+              {(selectedStock.change_30d_pct || 0) >= 0 ? "+" : ""}{(selectedStock.change_30d_pct || 0).toFixed(1)}% (30D)
+            </span>
+          </div>
+          <div className="miniChartActions">
+            <button className="btn secondary showChartBtn" onClick={() => setShowTopChart(true)}>
+              <TrendingUp size={13} /> View MTF Chart
+            </button>
+            <button className="btn deepDiveBtn" onClick={() => setDrawerStock(selectedStock)}>
+              <Eye size={13} /> Full Deep Dive
+            </button>
+          </div>
         </div>
+      )}
 
-        {/* Multi-Dimensional Filter Dropdowns */}
-        <div className="screenerFilterRow">
+      {/* 4. Streamlined & High-Density Interactive Control Hub */}
+      <div className="card screenerControlCard">
+        {/* Unified Action Bar: Search, Table Perspectives & Filter Toggle */}
+        <div className="screenerTopBar">
           <div className="screenerSearchBox">
-            <Search size={16} />
+            <Search size={15} className="searchIcon" />
             <input
+              ref={searchInputRef}
               type="text"
-              placeholder="Search ticker, company, ISIN or sector..."
+              placeholder="Search symbol, company, ISIN or sector... (Ctrl+K)"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -854,192 +898,373 @@ export default function ScreenerView() {
               }}
             />
             {search && (
-              <button className="clearSearchBtn" onClick={() => setSearch("")}>
-                ×
+              <button className="clearSearchBtn" onClick={() => setSearch("")} title="Clear search">
+                <X size={13} />
               </button>
             )}
+            <kbd className="searchKbd">Ctrl K</kbd>
           </div>
 
-          <div className="screenerFilterDropdowns">
-            {/* Exchange */}
-            <div className="filterPills">
-              <span className="filterLabel">EXCHANGE:</span>
-              <select
-                className="filterSelect"
-                value={exchange}
-                onChange={(e) => {
-                  setExchange(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="ALL">All Markets</option>
-                <option value="NSE">NSE Only</option>
-                <option value="BSE">BSE Only</option>
-              </select>
-            </div>
-
-            {/* Index Benchmark */}
-            <div className="filterPills">
-              <span className="filterLabel">INDEX:</span>
-              <select
-                className="filterSelect"
-                value={indexFilter}
-                onChange={(e) => {
-                  setIndexFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="ALL">All Indices</option>
-                <option value="Nifty 50">Nifty 50</option>
-                <option value="Nifty Next 50">Nifty Next 50</option>
-                <option value="Nifty Midcap 100">Nifty Midcap 100</option>
-                <option value="Nifty Smallcap 250">Nifty Smallcap 250</option>
-              </select>
-            </div>
-
-            {/* Sector */}
-            <div className="filterPills">
-              <span className="filterLabel">SECTOR:</span>
-              <select
-                className="filterSelect"
-                value={sectorFilter}
-                onChange={(e) => {
-                  setSectorFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="ALL">All Sectors</option>
-                <option value="Banking & Financials">Banking & Financials</option>
-                <option value="Information Tech">Information Tech</option>
-                <option value="Energy & Utilities">Energy & Utilities</option>
-                <option value="Automotive & EV">Automotive & EV</option>
-                <option value="Healthcare & Pharma">Healthcare & Pharma</option>
-                <option value="FMCG & Consumer">FMCG & Consumer</option>
-                <option value="Industrials & Infra">Industrials & Infra</option>
-                <option value="Metals & Mining">Metals & Mining</option>
-                <option value="Telecom & Media">Telecom & Media</option>
-                <option value="Real Estate & Construction">Real Estate & Construction</option>
-              </select>
-            </div>
-
-            {/* Cap Tier */}
-            <div className="filterPills">
-              <span className="filterLabel">CAP TIER:</span>
-              <select
-                className="filterSelect"
-                value={capTierFilter}
-                onChange={(e) => {
-                  setCapTierFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="ALL">All Tiers</option>
-                <option value="Large-Cap">Large-Cap (&gt;₹20k Cr)</option>
-                <option value="Mid-Cap">Mid-Cap (₹5k–₹20k Cr)</option>
-                <option value="Small-Cap">Small-Cap (&lt;₹5k Cr)</option>
-              </select>
-            </div>
-
-            {/* Technical Pattern Recognition Filter */}
-            <div className="filterPills">
-              <span className="filterLabel">PATTERN:</span>
-              <select
-                className="filterSelect"
-                value={patternFilter}
-                onChange={(e) => {
-                  setPatternFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="ALL">All Signals</option>
-                <option value="GOLDEN CROSS">Golden Cross (50&gt;200)</option>
-                <option value="BREAKOUT">52W Breakout</option>
-                <option value="RSI OVERSOLD">RSI Oversold (&lt;32)</option>
-                <option value="RSI OVERBOUGHT">RSI Overbought (&gt;70)</option>
-                <option value="BULLISH SURGE">Bullish Engulfing Surge</option>
-                <option value="SQUEEZE RISK">Margin Squeeze Risk</option>
-              </select>
-            </div>
-
-            {/* Analyst Rating */}
-            <div className="filterPills">
-              <span className="filterLabel">ANALYSTS:</span>
-              <select
-                className="filterSelect"
-                value={analystFilter}
-                onChange={(e) => {
-                  setAnalystFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="ALL">All Ratings</option>
-                <option value="BUY_ONLY">Strong Buy / Buy Only</option>
-                <option value="HIGH_UPSIDE">&gt; 15% Target Upside</option>
-              </select>
-            </div>
-
-            {/* Reset */}
-            {(search ||
-              exchange !== "ALL" ||
-              indexFilter !== "ALL" ||
-              sectorFilter !== "ALL" ||
-              capTierFilter !== "ALL" ||
-              patternFilter !== "ALL" ||
-              analystFilter !== "ALL" ||
-              preset !== "all" ||
-              minBookFilter > 0) && (
-              <button
-                className="btn secondary resetBtn"
-                onClick={() => {
-                  setSearch("");
-                  setExchange("ALL");
-                  setIndexFilter("ALL");
-                  setSectorFilter("ALL");
-                  setCapTierFilter("ALL");
-                  setPatternFilter("ALL");
-                  setAnalystFilter("ALL");
-                  setPreset("all");
-                  setActiveCustomScreen(null);
-                  setMinBookFilter(0);
-                  setPage(1);
-                }}
-              >
-                <RotateCcw size={13} /> Reset
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* View Perspective Selector */}
-        <div className="perspectiveRow">
-          <span className="perspectiveLabel">TABLE VIEW:</span>
-          <div className="perspectiveButtons">
+          <div className="tableModeSegment">
             <button
-              className={`perspectiveBtn ${tableMode === "mtf" ? "active" : ""}`}
+              className={`tableModeBtn ${tableMode === "mtf" ? "active" : ""}`}
               onClick={() => setTableMode("mtf")}
+              title="Margin Trading Book & Liquidity Risk"
             >
-              📊 MTF & Liquidity Risk
+              <span>📊 MTF Risk</span>
             </button>
             <button
-              className={`perspectiveBtn ${tableMode === "fundamentals" ? "active" : ""}`}
+              className={`tableModeBtn ${tableMode === "fundamentals" ? "active" : ""}`}
               onClick={() => setTableMode("fundamentals")}
+              title="Valuation Multiples & Fundamentals"
             >
-              📈 Valuation & Fundamentals
+              <span>📈 Valuation</span>
             </button>
             <button
-              className={`perspectiveBtn ${tableMode === "technicals" ? "active" : ""}`}
+              className={`tableModeBtn ${tableMode === "technicals" ? "active" : ""}`}
               onClick={() => setTableMode("technicals")}
+              title="Technicals & Chart Patterns"
             >
-              ⚡ Technicals & Patterns
+              <span>⚡ Technicals</span>
             </button>
             <button
-              className={`perspectiveBtn ${tableMode === "analysts" ? "active" : ""}`}
+              className={`tableModeBtn ${tableMode === "analysts" ? "active" : ""}`}
               onClick={() => setTableMode("analysts")}
+              title="Shareholding & Analyst Consensus"
             >
-              🎯 Ownership & Analyst Consensus
+              <span>🎯 Ownership</span>
             </button>
           </div>
+
+          <div className="screenerTopActions">
+            <button
+              className={`filterToggleBtn ${showFilters ? "open" : ""} ${activeFilterCount > 0 ? "hasFilters" : ""}`}
+              onClick={() => setShowFilters((prev) => !prev)}
+              title="Toggle multi-metric filter dropdowns"
+            >
+              <SlidersHorizontal size={13} />
+              <span>Filters</span>
+              {activeFilterCount > 0 && <span className="filterCountBadge">{activeFilterCount}</span>}
+              {showFilters ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </button>
+
+            {isAnyFilterActive && (
+              <button
+                className="quickResetBtn"
+                onClick={resetAllFilters}
+                title="Reset search and all active filters"
+              >
+                <RotateCcw size={12} />
+                <span>Reset</span>
+              </button>
+            )}
+
+            <span className="stockMatchPill">
+              {filteredStocks.length.toLocaleString("en-IN")} stocks
+            </span>
+          </div>
         </div>
+
+        {/* Strategy Preset Strip with Smooth Carousel */}
+        <div className="presetStripWrap">
+          <button
+            className="presetScrollArrow left"
+            onClick={() => scrollPreset("left")}
+            title="Scroll presets left"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={14} />
+          </button>
+
+          <div className="presetTabsRow" ref={presetScrollRef}>
+            <button
+              className={`presetTab ${preset === "all" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("all");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              All Securities
+            </button>
+            <button
+              className={`presetTab ${preset === "undervalued" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("undervalued");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              💎 Undervalued Growth
+            </button>
+            <button
+              className={`presetTab ${preset === "high_dividend" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("high_dividend");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              💰 High Dividend Yield
+            </button>
+            <button
+              className={`presetTab ${preset === "momentum" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("momentum");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              🚀 Breakout Momentum
+            </button>
+            <button
+              className={`presetTab ${preset === "oversold" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("oversold");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              ⚡ RSI Oversold Bounce
+            </button>
+            <button
+              className={`presetTab ${preset === "low_debt" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("low_debt");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              🛡️ Low-Debt Quality
+            </button>
+            <button
+              className={`presetTab ${preset === "squeeze" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("squeeze");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              ⚠️ Margin Squeeze Risk
+            </button>
+            <button
+              className={`presetTab ${preset === "mtf_accum" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("mtf_accum");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              📈 30D MTF Accumulation
+            </button>
+            <button
+              className={`presetTab ${preset === "watchlist" ? "active" : ""}`}
+              onClick={() => {
+                setPreset("watchlist");
+                setActiveCustomScreen(null);
+                setPage(1);
+              }}
+            >
+              ⭐ Watchlist ({watchlist.length})
+            </button>
+
+            {/* Custom screens */}
+            {customScreens.map((cs) => (
+              <div key={cs.id} className="customScreenPillWrap">
+                <button
+                  className={`presetTab ${activeCustomScreen?.id === cs.id ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveCustomScreen(cs);
+                    setPreset("custom");
+                    setPage(1);
+                  }}
+                >
+                  ⚙️ {cs.name}
+                </button>
+                <button
+                  className="deleteCustomPillBtn"
+                  onClick={(e) => handleDeleteCustomScreen(cs.id, e)}
+                  title="Delete this screen"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="presetScrollArrow right"
+            onClick={() => scrollPreset("right")}
+            title="Scroll presets right"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {/* Collapsible Smart Filter Tray */}
+        {showFilters && (
+          <div className="filterTrayContainer">
+            <div className="filterDropdownsGrid">
+              <div className={`filterPillBox ${exchange !== "ALL" ? "activePill" : ""}`}>
+                <span className="filterPillLabel">Exchange</span>
+                <select
+                  className="filterSelect"
+                  value={exchange}
+                  onChange={(e) => {
+                    setExchange(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="ALL">All Markets</option>
+                  <option value="NSE">NSE Only</option>
+                  <option value="BSE">BSE Only</option>
+                </select>
+              </div>
+
+              <div className={`filterPillBox ${indexFilter !== "ALL" ? "activePill" : ""}`}>
+                <span className="filterPillLabel">Index</span>
+                <select
+                  className="filterSelect"
+                  value={indexFilter}
+                  onChange={(e) => {
+                    setIndexFilter(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="ALL">All Indices</option>
+                  <option value="Nifty 50">Nifty 50</option>
+                  <option value="Nifty Next 50">Nifty Next 50</option>
+                  <option value="Nifty Midcap 100">Nifty Midcap 100</option>
+                  <option value="Nifty Smallcap 250">Nifty Smallcap 250</option>
+                </select>
+              </div>
+
+              <div className={`filterPillBox ${sectorFilter !== "ALL" ? "activePill" : ""}`}>
+                <span className="filterPillLabel">Sector</span>
+                <select
+                  className="filterSelect"
+                  value={sectorFilter}
+                  onChange={(e) => {
+                    setSectorFilter(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="ALL">All Sectors</option>
+                  <option value="Banking & Financials">Banking & Financials</option>
+                  <option value="Information Tech">Information Tech</option>
+                  <option value="Energy & Utilities">Energy & Utilities</option>
+                  <option value="Automotive & EV">Automotive & EV</option>
+                  <option value="Healthcare & Pharma">Healthcare & Pharma</option>
+                  <option value="FMCG & Consumer">FMCG & Consumer</option>
+                  <option value="Industrials & Infra">Industrials & Infra</option>
+                  <option value="Metals & Mining">Metals & Mining</option>
+                  <option value="Telecom & Media">Telecom & Media</option>
+                  <option value="Real Estate & Construction">Real Estate & Construction</option>
+                </select>
+              </div>
+
+              <div className={`filterPillBox ${capTierFilter !== "ALL" ? "activePill" : ""}`}>
+                <span className="filterPillLabel">Market Cap</span>
+                <select
+                  className="filterSelect"
+                  value={capTierFilter}
+                  onChange={(e) => {
+                    setCapTierFilter(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="ALL">All Tiers</option>
+                  <option value="Large-Cap">Large-Cap (&gt;₹20k Cr)</option>
+                  <option value="Mid-Cap">Mid-Cap (₹5k - ₹20k Cr)</option>
+                  <option value="Small-Cap">Small-Cap (&lt;₹5k Cr)</option>
+                </select>
+              </div>
+
+              <div className={`filterPillBox ${patternFilter !== "ALL" ? "activePill" : ""}`}>
+                <span className="filterPillLabel">Signal</span>
+                <select
+                  className="filterSelect"
+                  value={patternFilter}
+                  onChange={(e) => {
+                    setPatternFilter(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="ALL">All Signals</option>
+                  <option value="GOLDEN CROSS">Golden Cross (50&gt;200)</option>
+                  <option value="BREAKOUT">52W Breakout</option>
+                  <option value="RSI OVERSOLD">RSI Oversold (&lt;32)</option>
+                  <option value="RSI OVERBOUGHT">RSI Overbought (&gt;70)</option>
+                  <option value="BULLISH SURGE">Bullish Engulfing</option>
+                  <option value="SQUEEZE RISK">Margin Squeeze Risk</option>
+                </select>
+              </div>
+
+              <div className={`filterPillBox ${analystFilter !== "ALL" ? "activePill" : ""}`}>
+                <span className="filterPillLabel">Wall St Rating</span>
+                <select
+                  className="filterSelect"
+                  value={analystFilter}
+                  onChange={(e) => {
+                    setAnalystFilter(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="ALL">All Ratings</option>
+                  <option value="BUY_ONLY">Strong Buy / Buy</option>
+                  <option value="HIGH_UPSIDE">&gt; 15% Upside</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dismissible Active Filter Chips Row */}
+        {activeFilterCount > 0 && (
+          <div className="activeFilterTagsRow">
+            <span className="activeTagsTitle">Filtered by:</span>
+            {exchange !== "ALL" && (
+              <span className="activeTagChip">
+                Market: {exchange}
+                <button onClick={() => setExchange("ALL")} title="Remove filter">×</button>
+              </span>
+            )}
+            {indexFilter !== "ALL" && (
+              <span className="activeTagChip">
+                Index: {indexFilter}
+                <button onClick={() => setIndexFilter("ALL")} title="Remove filter">×</button>
+              </span>
+            )}
+            {sectorFilter !== "ALL" && (
+              <span className="activeTagChip">
+                Sector: {sectorFilter}
+                <button onClick={() => setSectorFilter("ALL")} title="Remove filter">×</button>
+              </span>
+            )}
+            {capTierFilter !== "ALL" && (
+              <span className="activeTagChip">
+                Cap: {capTierFilter}
+                <button onClick={() => setCapTierFilter("ALL")} title="Remove filter">×</button>
+              </span>
+            )}
+            {patternFilter !== "ALL" && (
+              <span className="activeTagChip">
+                Signal: {patternFilter}
+                <button onClick={() => setPatternFilter("ALL")} title="Remove filter">×</button>
+              </span>
+            )}
+            {analystFilter !== "ALL" && (
+              <span className="activeTagChip">
+                Analyst: {analystFilter === "BUY_ONLY" ? "Buy Only" : ">15% Upside"}
+                <button onClick={() => setAnalystFilter("ALL")} title="Remove filter">×</button>
+              </span>
+            )}
+            <button className="clearAllTagsBtn" onClick={resetAllFilters}>
+              Clear all ({activeFilterCount})
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 5. Custom Rule Builder Modal */}
@@ -1293,6 +1518,9 @@ export default function ScreenerView() {
                         <div className="stockIdent">
                           <div className="stockSymbolLine">
                             <span className="symbolText">{stock.symbol}</span>
+                            {liveQuotes[stock.symbol] && (
+                              <span className="liveDotMini" title="Live Market Feed Active" />
+                            )}
                             {stock.is_etf && <span className="tagMini etfTag">ETF</span>}
                             <span className="miniSectorText">{stock.sector}</span>
                           </div>
@@ -1369,10 +1597,25 @@ export default function ScreenerView() {
 
                       {tableMode === "technicals" && (
                         <>
-                          <td className="number bookCell">₹{stock.currentPrice}</td>
-                          <td className={`number ${stock.dayMove >= 0 ? "positive" : "negative"}`}>
-                            {stock.dayMove >= 0 ? "+" : ""}
-                            {stock.dayMove}%
+                          <td
+                            className={`number bookCell ${
+                              priceTicks[stock.symbol] ? `tick-${priceTicks[stock.symbol]}` : ""
+                            }`}
+                          >
+                            ₹{Number(
+                              liveQuotes[stock.symbol]?.cmp ?? stock.currentPrice
+                            ).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {liveQuotes[stock.symbol] && <span className="liveDotMini" title="Live Quote" />}
+                          </td>
+                          <td
+                            className={`number ${
+                              (liveQuotes[stock.symbol]?.percentChange ?? stock.dayMove) >= 0
+                                ? "positive"
+                                : "negative"
+                            }`}
+                          >
+                            {(liveQuotes[stock.symbol]?.percentChange ?? stock.dayMove) >= 0 ? "+" : ""}
+                            {Number(liveQuotes[stock.symbol]?.percentChange ?? stock.dayMove).toFixed(2)}%
                           </td>
                           <td className="number">
                             <span
@@ -1431,6 +1674,7 @@ export default function ScreenerView() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedStock(stock);
+                              setShowTopChart(true);
                               window.scrollTo({ top: 140, behavior: "smooth" });
                             }}
                             title="Inspect Top Chart"
@@ -1498,6 +1742,7 @@ export default function ScreenerView() {
           onAddAlert={addAlert}
           onDeleteAlert={deleteAlert}
           historyData={stockHistory}
+          liveQuote={drawerStock ? liveQuotes[drawerStock.symbol] : null}
         />
       )}
     </div>

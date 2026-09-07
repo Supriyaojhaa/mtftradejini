@@ -43,14 +43,18 @@ export default function StockDrawer({
   onAddAlert,
   onDeleteAlert,
   historyData,
+  liveQuote,
 }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [chartPeriod, setChartPeriod] = useState("1Y");
 
+  const currentPrice = liveQuote?.cmp ?? stock?.currentPrice;
+  const dayMove = liveQuote?.percentChange ?? stock?.dayMove;
+
   // Alert Form state
   const [alertType, setAlertType] = useState("price_above");
   const [alertValue, setAlertValue] = useState(
-    stock ? Math.round(stock.currentPrice * 1.05) : 1000
+    stock ? Math.round(currentPrice * 1.05) : 1000
   );
   const [alertSaved, setAlertSaved] = useState(false);
 
@@ -110,12 +114,15 @@ export default function StockDrawer({
               </h2>
             </div>
             <div className="drawerPriceLine">
-              <span className="drawerCurrentPrice">₹{stock.currentPrice?.toLocaleString("en-IN")}</span>
+              <span className="drawerCurrentPrice">
+                ₹{Number(currentPrice).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {liveQuote && <span className="liveDotMini" title="Live Market Feed Active" />}
+              </span>
               <span
-                className={`drawerDayChange ${stock.dayMove >= 0 ? "positive" : "negative"}`}
+                className={`drawerDayChange ${dayMove >= 0 ? "positive" : "negative"}`}
               >
-                {stock.dayMove >= 0 ? "+" : ""}
-                {stock.dayMove}% (1D)
+                {dayMove >= 0 ? "+" : ""}
+                {Number(dayMove).toFixed(2)}% (1D)
               </span>
               <span className="drawerMcapText">
                 MCap: ₹{Number(stock.mcapCr).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr ({stock.capTier})
@@ -496,15 +503,15 @@ export default function StockDrawer({
                 <div className="drawerStatBox">
                   <span>50-DMA</span>
                   <strong>₹{stock.dma50}</strong>
-                  <small className={stock.currentPrice > stock.dma50 ? "positive" : "negative"}>
-                    {stock.currentPrice > stock.dma50 ? "Above 50-DMA" : "Below 50-DMA"}
+                  <small className={currentPrice > stock.dma50 ? "positive" : "negative"}>
+                    {currentPrice > stock.dma50 ? "Above 50-DMA" : "Below 50-DMA"}
                   </small>
                 </div>
                 <div className="drawerStatBox">
                   <span>200-DMA</span>
                   <strong>₹{stock.dma200}</strong>
-                  <small className={stock.currentPrice > stock.dma200 ? "positive" : "negative"}>
-                    {stock.currentPrice > stock.dma200 ? "Above 200-DMA" : "Below 200-DMA"}
+                  <small className={currentPrice > stock.dma200 ? "positive" : "negative"}>
+                    {currentPrice > stock.dma200 ? "Above 200-DMA" : "Below 200-DMA"}
                   </small>
                 </div>
                 <div className="drawerStatBox">
@@ -520,7 +527,7 @@ export default function StockDrawer({
                 <div className="rangeBarContainer">
                   <div className="rangeLabels">
                     <span>52W Low: <b>₹{stock.low52}</b></span>
-                    <span>Current: <b>₹{stock.currentPrice}</b></span>
+                    <span>Current: <b>₹{Number(currentPrice).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></span>
                     <span>52W High: <b>₹{stock.high52}</b></span>
                   </div>
                   <div className="rangeTrack">
@@ -531,7 +538,7 @@ export default function StockDrawer({
                           100,
                           Math.max(
                             0,
-                            ((stock.currentPrice - stock.low52) / (stock.high52 - stock.low52 || 1)) * 100
+                            ((currentPrice - stock.low52) / (stock.high52 - stock.low52 || 1)) * 100
                           )
                         )}%`,
                       }}
@@ -593,7 +600,7 @@ export default function StockDrawer({
                 <div className="targetWall">
                   <div className="targetStep">
                     <span>Current Price</span>
-                    <strong>₹{stock.currentPrice}</strong>
+                    <strong>₹{Number(currentPrice).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                   </div>
                   <div className="targetArrow">→</div>
                   <div className="targetStep targetHighlight">
