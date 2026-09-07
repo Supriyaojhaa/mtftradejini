@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {createRoot} from "react-dom/client";
 import {AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, ReferenceLine} from "recharts";
-import {Home, Search, PieChart as PieIcon, Calculator, Send, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight} from "lucide-react";
+import {Home, Search, PieChart as PieIcon, Calculator, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight} from "lucide-react";
 import ScreenerView from "./ScreenerView.jsx";
 import SectorsView from "./SectorsView.jsx";
 import CalculatorView from "./CalculatorView.jsx";
@@ -479,7 +479,6 @@ function App(){
     <Nav icon={<Search/>} text="Stock Screener" active={tab==="screener"} onClick={()=>setTab("screener")}/>
     <Nav icon={<PieIcon/>} text="Sectors & Map" active={tab==="sectors"} onClick={()=>setTab("sectors")}/>
     <Nav icon={<Calculator/>} text="Calculators" active={tab==="calc"} onClick={()=>setTab("calc")}/>
-    <Nav icon={<Send/>} text="Broker Share" badge="Soon"/>
     <div className="sideSpacer"/>
     <div className="insight">
       <span>MTF INSIGHT</span>
