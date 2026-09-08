@@ -813,9 +813,6 @@ function App(){
        <Nav icon={<Home/>} text="Overview" active={tab==="overview"} onClick={()=>{setTab("overview"); setMobileNavOpen(false);}}/>
        <Nav icon={<Search/>} text="Stock Screener" active={tab==="screener"} onClick={()=>{setTab("screener"); setMobileNavOpen(false);}}/>
        <Nav icon={<PieIcon/>} text="Sectors & Map" active={tab==="sectors"} onClick={()=>{setTab("sectors"); setMobileNavOpen(false);}}/>
-       <Nav icon={<Calculator/>} text="Calculators" active={tab==="calc"} onClick={()=>{setTab("calc"); setMobileNavOpen(false);}}/>
-       <Nav icon={<CircleHelp/>} text="About" active={tab==="about"} onClick={()=>{setTab("about"); setMobileNavOpen(false);}}/>
-       <Nav icon={<ShieldCheck/>} text="Methodology" active={tab==="methodology"} onClick={()=>{setTab("methodology"); setMobileNavOpen(false);}}/>
      </div>
      <div className="insight" style={{marginTop: "auto", marginBottom: 0}}>
        <span>MTF INSIGHT</span>
@@ -837,7 +834,6 @@ function App(){
     <Nav icon={<Home/>} text="Overview" active={tab==="overview"} onClick={()=>setTab("overview")}/>
     <Nav icon={<Search/>} text="Stock Screener" active={tab==="screener"} onClick={()=>setTab("screener")}/>
     <Nav icon={<PieIcon/>} text="Sectors & Map" active={tab==="sectors"} onClick={()=>setTab("sectors")}/>
-    <Nav icon={<Calculator/>} text="Calculators" active={tab==="calc"} onClick={()=>setTab("calc")}/>
     <div className="insight">
       <span>MTF INSIGHT</span>
       <p>{pctCombined >= 0 ? "MTF book is up" : "MTF book is down"}</p>
@@ -861,8 +857,6 @@ function App(){
       </div>
       <small>vs {fmtDate(previous.date)}</small>
     </div>
-    <Nav icon={<CircleHelp/>} text="About" active={tab==="about"} onClick={()=>setTab("about")}/>
-    <Nav icon={<ShieldCheck/>} text="Methodology" active={tab==="methodology"} onClick={()=>setTab("methodology")}/>
     <div className="sideSpacer"/>
    </aside>
    <main className={`content ${sidebarCollapsed ? "expanded" : ""}`}>

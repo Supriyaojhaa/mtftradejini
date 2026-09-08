@@ -701,13 +701,6 @@ export default function ScreenerView() {
 
               <div className="chartActionsGroup">
                 <button
-                  className="btn deepDiveBtn"
-                  onClick={() => setDrawerStock(selectedStock)}
-                  title="View Full Financial Statements & Analysis"
-                >
-                  <Eye size={14} /> Full Deep Dive
-                </button>
-                <button
                   className="btn secondary chartDismissBtn"
                   onClick={() => setShowTopChart(false)}
                   title="Hide chart to maximize table space"
@@ -776,7 +769,7 @@ export default function ScreenerView() {
             )}
             <div className="chartLegendFooter">
               <span>
-                <i className="chartLegendSwatch blue" /> MTF Financed Book (₹ Cr) · Click "Full Deep Dive" to see 5Y Income Statements & Balance Sheets
+                <i className="chartLegendSwatch blue" /> MTF Financed Book (₹ Cr)
               </span>
               <span className="chartFootnote">Source: NSE/BSE MTF daily disclosures</span>
             </div>
@@ -813,9 +806,6 @@ export default function ScreenerView() {
           <div className="miniChartActions">
             <button className="btn secondary showChartBtn" onClick={() => setShowTopChart(true)}>
               <TrendingUp size={13} /> View MTF Chart
-            </button>
-            <button className="btn deepDiveBtn" onClick={() => setDrawerStock(selectedStock)}>
-              <Eye size={13} /> Full Deep Dive
             </button>
           </div>
         </div>
@@ -1485,16 +1475,6 @@ export default function ScreenerView() {
                             title="Inspect Top Chart"
                           >
                             Chart
-                          </button>
-                          <button
-                            className="deepDiveLinkBtn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDrawerStock(stock);
-                            }}
-                            title="Open Full 5Y Financial Statements & Technical Diagnostics"
-                          >
-                            Deep Dive
                           </button>
                         </div>
                       </td>

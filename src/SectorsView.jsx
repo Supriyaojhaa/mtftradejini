@@ -1583,7 +1583,7 @@ export default function SectorsView({ onBack }) {
               <div className="drawerStocksHead">
                 <h3>TOP MTF CONSTITUENTS ({selectedSector.name})</h3>
                 <span className="drawerStocksTip">
-                  Ranked by MTF book value. Click "Deep Dive" to launch full institutional metrics.
+                  Ranked by MTF book value.
                 </span>
               </div>
 
@@ -1598,7 +1598,6 @@ export default function SectorsView({ onBack }) {
                       <th className="number">30D MOVE</th>
                       <th className="number">FF LEVERAGE</th>
                       <th>RSI / TECH</th>
-                      <th style={{ textAlign: "center" }}>DEEP DIVE</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1651,16 +1650,6 @@ export default function SectorsView({ onBack }) {
                                 </span>
                               )}
                             </div>
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            <button
-                              className="drawerInspectStockBtn"
-                              onClick={() => setDeepDiveStock(stock)}
-                              title={`Open full deep dive for ${stock.symbol}`}
-                            >
-                              <ExternalLink size={13} />
-                              <span>Deep Dive</span>
-                            </button>
                           </td>
                         </tr>
                       );
