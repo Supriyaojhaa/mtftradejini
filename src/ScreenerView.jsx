@@ -27,8 +27,6 @@ import {
   Star,
   Bell,
   Sliders,
-  Plus,
-  Trash2,
   Eye,
   Check,
   ShieldAlert,
@@ -146,23 +144,7 @@ export default function ScreenerView() {
     }
   });
 
-  // Custom Screens stored in localStorage
-  const [customScreens, setCustomScreens] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("mtf_custom_screens") || "[]");
-    } catch (e) {
-      return [];
-    }
-  });
-  const [activeCustomScreen, setActiveCustomScreen] = useState(null);
-  const [showRuleBuilder, setShowRuleBuilder] = useState(false);
 
-  // New custom rule state
-  const [customScreenName, setCustomScreenName] = useState("");
-  const [rulesList, setRulesList] = useState([
-    { metric: "pe", operator: "<", value: 25 },
-    { metric: "rsi", operator: "<", value: 40 },
-  ]);
 
   // Save watchlist & alerts to localStorage
   useEffect(() => {
@@ -177,11 +159,7 @@ export default function ScreenerView() {
     } catch (e) {}
   }, [alerts]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem("mtf_custom_screens", JSON.stringify(customScreens));
-    } catch (e) {}
-  }, [customScreens]);
+
 
   const toggleWatchlist = (symbol) => {
     setWatchlist((prev) =>
@@ -232,10 +210,9 @@ export default function ScreenerView() {
     return Boolean(
       search ||
       activeFilterCount > 0 ||
-      preset !== "all" ||
-      activeCustomScreen !== null
+      preset !== "all"
     );
-  }, [search, activeFilterCount, preset, activeCustomScreen]);
+  }, [search, activeFilterCount, preset]);
 
   const resetAllFilters = () => {
     setSearch("");
@@ -246,7 +223,6 @@ export default function ScreenerView() {
     setPatternFilter("ALL");
     setAnalystFilter("ALL");
     setPreset("all");
-    setActiveCustomScreen(null);
     setMinBookFilter(0);
     setPage(1);
   };
@@ -373,18 +349,8 @@ export default function ScreenerView() {
           if ((s.days_to_cover || 0) < 4.5 || (s.ff_leverage_pct || 0) < 3.5) return false;
         } else if (preset === "mtf_accum") {
           if ((s.change_30d_pct || 0) < 25) return false;
-        } else if (preset === "custom" && activeCustomScreen) {
-          // Evaluate custom screen rules
-          for (const rule of activeCustomScreen.rules) {
-            const val = s[rule.metric];
-            if (val == null) return false;
-            const target = Number(rule.value);
-            if (rule.operator === "<" && !(val < target)) return false;
-            if (rule.operator === "<=" && !(val <= target)) return false;
-            if (rule.operator === ">" && !(val > target)) return false;
-            if (rule.operator === ">=" && !(val >= target)) return false;
-          }
         }
+
 
         // Search text
         if (search.trim()) {
@@ -424,7 +390,6 @@ export default function ScreenerView() {
     minBookFilter,
     watchlist,
     alerts,
-    activeCustomScreen,
     sortKey,
     sortAsc,
   ]);
@@ -482,28 +447,6 @@ export default function ScreenerView() {
     }
   };
 
-  const handleSaveCustomScreen = () => {
-    if (!customScreenName.trim() || !rulesList.length) return;
-    const newScreen = {
-      id: Date.now().toString(),
-      name: customScreenName.trim(),
-      rules: rulesList,
-    };
-    setCustomScreens((prev) => [...prev, newScreen]);
-    setActiveCustomScreen(newScreen);
-    setPreset("custom");
-    setShowRuleBuilder(false);
-    setCustomScreenName("");
-  };
-
-  const handleDeleteCustomScreen = (id, e) => {
-    e.stopPropagation();
-    setCustomScreens((prev) => prev.filter((cs) => cs.id !== id));
-    if (activeCustomScreen?.id === id) {
-      setActiveCustomScreen(null);
-      setPreset("all");
-    }
-  };
 
   // Export comprehensive CSV
   const handleExportCSV = () => {
@@ -627,9 +570,6 @@ export default function ScreenerView() {
         </div>
 
         <div className="screenerActions">
-          <button className="btn secondary csvBtn" onClick={() => setShowRuleBuilder(true)}>
-            <Plus size={15} /> Custom Screen
-          </button>
           <button className="btn secondary csvBtn" onClick={handleExportCSV}>
             <FileSpreadsheet size={15} /> Export Dataset
           </button>
@@ -981,7 +921,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "all" ? "active" : ""}`}
               onClick={() => {
                 setPreset("all");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -991,7 +930,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "undervalued" ? "active" : ""}`}
               onClick={() => {
                 setPreset("undervalued");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -1001,7 +939,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "high_dividend" ? "active" : ""}`}
               onClick={() => {
                 setPreset("high_dividend");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -1011,7 +948,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "momentum" ? "active" : ""}`}
               onClick={() => {
                 setPreset("momentum");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -1021,7 +957,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "oversold" ? "active" : ""}`}
               onClick={() => {
                 setPreset("oversold");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -1031,7 +966,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "low_debt" ? "active" : ""}`}
               onClick={() => {
                 setPreset("low_debt");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -1041,7 +975,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "squeeze" ? "active" : ""}`}
               onClick={() => {
                 setPreset("squeeze");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -1051,7 +984,6 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "mtf_accum" ? "active" : ""}`}
               onClick={() => {
                 setPreset("mtf_accum");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
@@ -1061,35 +993,13 @@ export default function ScreenerView() {
               className={`presetTab ${preset === "watchlist" ? "active" : ""}`}
               onClick={() => {
                 setPreset("watchlist");
-                setActiveCustomScreen(null);
                 setPage(1);
               }}
             >
               ⭐ Watchlist ({watchlist.length})
             </button>
 
-            {/* Custom screens */}
-            {customScreens.map((cs) => (
-              <div key={cs.id} className="customScreenPillWrap">
-                <button
-                  className={`presetTab ${activeCustomScreen?.id === cs.id ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveCustomScreen(cs);
-                    setPreset("custom");
-                    setPage(1);
-                  }}
-                >
-                  ⚙️ {cs.name}
-                </button>
-                <button
-                  className="deleteCustomPillBtn"
-                  onClick={(e) => handleDeleteCustomScreen(cs.id, e)}
-                  title="Delete this screen"
-                >
-                  <X size={11} />
-                </button>
-              </div>
-            ))}
+
           </div>
 
           <button
@@ -1267,112 +1177,7 @@ export default function ScreenerView() {
         )}
       </div>
 
-      {/* 5. Custom Rule Builder Modal */}
-      {showRuleBuilder && (
-        <div className="ruleModalOverlay" onClick={() => setShowRuleBuilder(false)}>
-          <div className="ruleModalPanel card" onClick={(e) => e.stopPropagation()}>
-            <div className="ruleModalHeader">
-              <h3>Build Custom Screener Rule Set</h3>
-              <button className="ruleModalClose" onClick={() => setShowRuleBuilder(false)}>
-                ×
-              </button>
-            </div>
-
-            <div className="ruleModalBody">
-              <label className="screenNameField">
-                <span>Screen Template Name:</span>
-                <input
-                  type="text"
-                  placeholder="e.g. My High Momentum Value"
-                  value={customScreenName}
-                  onChange={(e) => setCustomScreenName(e.target.value)}
-                />
-              </label>
-
-              <div className="rulesSectionHeader">Filter Criteria Rules:</div>
-              <div className="ruleRowsList">
-                {rulesList.map((r, idx) => (
-                  <div key={idx} className="ruleRowItem">
-                    <select
-                      value={r.metric}
-                      onChange={(e) => {
-                        const next = [...rulesList];
-                        next[idx].metric = e.target.value;
-                        setRulesList(next);
-                      }}
-                    >
-                      <option value="pe">P/E Ratio</option>
-                      <option value="pb">P/B Ratio</option>
-                      <option value="epsGrowth">EPS Growth YoY %</option>
-                      <option value="divYield">Dividend Yield %</option>
-                      <option value="roe">Return on Equity (ROE %)</option>
-                      <option value="debtToEquity">Debt to Equity Ratio</option>
-                      <option value="rsi">RSI (14D)</option>
-                      <option value="bookCr">MTF Book (₹ Cr)</option>
-                      <option value="leverage_pct">Leverage % Mcap</option>
-                      <option value="ff_leverage_pct">Free Float Leverage %</option>
-                      <option value="days_to_cover">Days to Cover (DTC)</option>
-                      <option value="upsidePct">Analyst Target Upside %</option>
-                    </select>
-
-                    <select
-                      value={r.operator}
-                      onChange={(e) => {
-                        const next = [...rulesList];
-                        next[idx].operator = e.target.value;
-                        setRulesList(next);
-                      }}
-                    >
-                      <option value="<">&lt; Less than</option>
-                      <option value="<=">&le; Less than or equal</option>
-                      <option value=">">&gt; Greater than</option>
-                      <option value=">=">&ge; Greater than or equal</option>
-                    </select>
-
-                    <input
-                      type="number"
-                      step="any"
-                      value={r.value}
-                      onChange={(e) => {
-                        const next = [...rulesList];
-                        next[idx].value = e.target.value;
-                        setRulesList(next);
-                      }}
-                    />
-
-                    {rulesList.length > 1 && (
-                      <button
-                        className="ruleDeleteBtn"
-                        onClick={() => setRulesList(rulesList.filter((_, i) => i !== idx))}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <button
-                className="btn secondary addRuleBtn"
-                onClick={() => setRulesList([...rulesList, { metric: "pe", operator: "<", value: 20 }])}
-              >
-                <Plus size={14} /> Add Another Rule
-              </button>
-            </div>
-
-            <div className="ruleModalFooter">
-              <button className="btn secondary" onClick={() => setShowRuleBuilder(false)}>
-                Cancel
-              </button>
-              <button className="btn createScreenBtn" onClick={handleSaveCustomScreen}>
-                <Check size={14} /> Save & Apply Screen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 6. Screener Table */}
+      {/* 5. Screener Table */}
       <section className="card screenerTableCard">
         <div className="screenerTableScroll">
           <table className="screenerTable">

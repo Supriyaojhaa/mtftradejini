@@ -7224,9 +7224,22 @@ html[data-theme=light] .tableModeBtn.active {
 
 .sidebarTopToggleRow {
   display: flex;
-  justify-content: flex-end;
-  padding: 0 4px 8px 4px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px 8px 10px;
   margin-bottom: 4px;
+  min-height: 32px;
+}
+
+.sidebarTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
 }
 
 .sidebarIconToggleBtn {
@@ -7263,6 +7276,10 @@ html[data-theme=light] .tableModeBtn.active {
   justify-content: center !important;
   padding: 0 0 8px 0 !important;
   width: 100% !important;
+}
+
+.sidebar.collapsed .sidebarTitle {
+  display: none !important;
 }
 
 .sidebar.collapsed .nav {

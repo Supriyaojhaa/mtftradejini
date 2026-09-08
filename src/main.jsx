@@ -507,7 +507,35 @@ function DailyActivityHeatmap({ flow = [] }) {
 
 function App(){
 
- const [dark,setDark]=useState(true);
+ const [dark, setDark] = useState(() => {
+   if (typeof window !== "undefined") {
+     try {
+       const saved = localStorage.getItem("mtf_theme") || localStorage.getItem("theme");
+       if (saved === "dark") return true;
+       if (saved === "light") return false;
+     } catch (e) {}
+     const attr = document.documentElement.getAttribute("data-theme") || document.documentElement.dataset.theme;
+     if (attr === "dark") return true;
+     if (attr === "light") return false;
+   }
+   return false;
+ });
+
+ const toggleTheme = () => {
+   setDark(prev => {
+     const next = !prev;
+     const theme = next ? "dark" : "light";
+     document.documentElement.setAttribute("data-theme", theme);
+     document.documentElement.dataset.theme = theme;
+     try {
+       localStorage.setItem("mtf_theme", theme);
+       localStorage.setItem("theme", theme);
+     } catch (e) {}
+     const metaTheme = document.querySelector('meta[name="theme-color"]');
+     if (metaTheme) metaTheme.setAttribute("content", next ? "#050b16" : "#f8fafc");
+     return next;
+   });
+ };
   const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
   const [mobileNavOpen,setMobileNavOpen]=useState(false);
   const [isMobile,setIsMobile]=useState(()=>(typeof window!=="undefined"?window.innerWidth<=780:false));
@@ -542,7 +570,17 @@ function App(){
  const [flowType,setFlowType]=useState("dual");
  const [hoveredClass,setHoveredClass]=useState(null);
 
- useEffect(()=>{document.documentElement.dataset.theme=dark?"dark":"light"},[dark]);
+  useEffect(() => {
+    const theme = dark ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem("mtf_theme", theme);
+      localStorage.setItem("theme", theme);
+    } catch (e) {}
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute("content", dark ? "#050b16" : "#f8fafc");
+  }, [dark]);
  useEffect(()=>{(async()=>{setLoading(true);try{
    const summary=await getJson("/api/v1/summary");
    const [t,f,c,s,scr]=await Promise.all([
@@ -737,7 +775,7 @@ function App(){
   <header className="topbar">
    <div className="brand">
       <div className="brandMark"><span/><span/><span/><span/></div>
-      <div><b>MTF ANALYTICS</b><small>India’s Margin Trading Intelligence</small></div>
+      <div><b>MTF ANALYTICS</b></div>
     </div>
     <div className="live" title="Feed connected and synced live from exchange records" aria-label="Live Feed"><i/></div>
     <div className="market" title="NSE and BSE publish aggregate MTF disclosures on a 1-2 day regulatory settlement lag. 02 Sept 2026 is the latest official disclosure released by the exchanges. Feed is synced live.">
@@ -745,7 +783,7 @@ function App(){
       <small>As of {fmtDate(displayDate)} &bull; Latest Released</small>
     </div>
     <div className="topbarRight">
-      <button className="iconBtn" onClick={()=>setDark(!dark)} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
+      <button className="iconBtn" onClick={toggleTheme} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
       <button className="iconBtn mobileMenuBtn" onClick={()=>setMobileNavOpen(prev => !prev)} title="Toggle navigation menu" aria-label="Toggle navigation menu">
         {mobileNavOpen ? <X size={19}/> : <Menu size={19}/>}
       </button>
@@ -791,6 +829,7 @@ function App(){
   <div className="body">
    <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
     <div className="sidebarTopToggleRow">
+      {!sidebarCollapsed && <span className="sidebarTitle">Trade Analysis</span>}
       <button className="sidebarIconToggleBtn" onClick={()=>setSidebarCollapsed(!sidebarCollapsed)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
         {sidebarCollapsed ? <PanelLeftOpen size={17}/> : <PanelLeftClose size={17}/>}
       </button>
