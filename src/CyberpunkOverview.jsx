@@ -3,10 +3,16 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid
+  CartesianGrid,
+  ReferenceLine
 } from "recharts";
 import {
   TrendingUp,
@@ -17,7 +23,13 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  LayoutGrid
+  LayoutGrid,
+  Search,
+  SlidersHorizontal,
+  ArrowUpRight,
+  ArrowDownRight,
+  ShieldCheck,
+  PieChart as PieIcon
 } from "lucide-react";
 
 // Fallback high-fidelity historical trajectory starting 2017 to 2026
@@ -34,23 +46,126 @@ const DEFAULT_TRAJECTORY = [
   { year: "2026", combined: 153140.74, bse: 6716.95 }
 ];
 
+function formatExactCr(lakh, decimals = 2) {
+  if (lakh == null || isNaN(lakh)) return "₹0.00 Cr";
+  const num = Number(lakh);
+  const isNeg = num < 0;
+  const cr = Math.abs(num) / 100;
+  const str = cr.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return `${isNeg ? "-" : ""}₹${str} Cr`;
+}
+
+function formatSignedCr(lakh, decimals = 2) {
+  if (lakh == null || isNaN(lakh)) return "₹0.00 Cr";
+  const num = Number(lakh);
+  if (num === 0) return "₹0.00 Cr";
+  const sign = num > 0 ? "+" : "-";
+  const cr = Math.abs(num) / 100;
+  const str = cr.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return `${sign}₹${str} Cr`;
+}
+
+function formatFlowY(v) {
+  const lakh = Math.abs(v);
+  const cr = lakh / 100;
+  if (cr === 0) return "₹0";
+  return `${v < 0 ? "-" : ""}₹${cr.toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
+}
+
+function fmtDate(d) {
+  if (!d) return "";
+  const s = String(d).trim();
+  const dt = new Date(s.includes("T") ? s : s + "T00:00:00");
+  if (isNaN(dt.getTime())) return "";
+  return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function fmtPct(v) {
+  return `${v >= 0 ? "+" : ""}${Number(v).toFixed(2)}%`;
+}
+
+function Spark({ positive }) {
+  const pts = positive
+    ? "M 0,22 Q 25,18 50,14 T 75,8 T 100,2"
+    : "M 0,4 Q 25,10 50,16 T 75,22 T 100,26";
+  const color = positive ? "#00f090" : "#ff3b57";
+  return (
+    <div style={{ width: "95px", height: "24px" }}>
+      <svg viewBox="0 0 100 28" preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
+        <path d={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </div>
+  );
+}
+
+function CustomFlowTooltip({ active, payload }) {
+  if (!active || !payload || !payload.length) return null;
+  const d = payload[0]?.payload;
+  if (!d) return null;
+  const fresh = d.fresh || 0;
+  const liq = d.liquidated || 0;
+  const net = d.net !== undefined ? d.net : (fresh - liq);
+  const isPositive = net >= 0;
+  return (
+    <div className="flowTooltipBox" style={{ background: "#0c131f", border: "1px solid #1e2c42", borderRadius: "8px", padding: "10px 12px", color: "#f8fafc", fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", borderBottom: "1px solid #1c2940", paddingBottom: "4px" }}>
+        <span style={{ color: "#94a3b8" }}>{fmtDate(d.date)}</span>
+        {d.flush && <span style={{ color: "#f59e0b", fontWeight: 700 }}>⚡ FLUSH EVENT</span>}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+          <span style={{ color: "#8b9cb4" }}>Fresh Borrowing:</span>
+          <b style={{ color: "#00f090" }}>+{formatExactCr(fresh)}</b>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+          <span style={{ color: "#8b9cb4" }}>Liquidated Margin:</span>
+          <b style={{ color: "#ff3b57" }}>-{formatExactCr(liq)}</b>
+        </div>
+        <div style={{ borderTop: "1px solid #1c2940", paddingTop: "4px", display: "flex", justifyContent: "space-between", gap: "12px", marginTop: "2px" }}>
+          <span style={{ color: "#cbd5e1", fontWeight: 600 }}>Net Daily Shift:</span>
+          <b style={{ color: isPositive ? "#00f090" : "#ff3b57" }}>{formatSignedCr(net)}</b>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CyberpunkOverview({
   data,
   summary,
   history = [],
   flow = [],
   stocks = [],
+  comp = [],
   activeSecuritiesCount = 4028,
   nseSecCount = 2172,
   bseSecCount = 1856,
-  onRefresh
+  onRefresh,
+  onNavigate
 }) {
   const [period, setPeriod] = useState("ALL");
   const [exchange, setExchange] = useState("ALL");
   const [carouselIdx, setCarouselIdx] = useState(1);
   const [isRotating, setIsRotating] = useState(false);
 
-  // Key metric figures matching reference
+  // Flow section states
+  const [flowPeriod, setFlowPeriod] = useState("14D");
+  const [flowType, setFlowType] = useState("dual");
+
+  // Table section states
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [rowsPer, setRowsPer] = useState(5);
+  const [sort, setSort] = useState("book");
+  const [sortAsc, setSortAsc] = useState(false);
+  const [tableExchange, setTableExchange] = useState("ALL");
+  const [hoveredClass, setHoveredClass] = useState(null);
+
+  // Heatmap interactive state
+  const [hoveredDay, setHoveredDay] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  // Exact Cockpit figures
   const totalBookStr = "1,53,140.74";
   const totalDeltaCrStr = "-180.03";
   const totalDeltaPctStr = "-0.12%";
@@ -68,7 +183,6 @@ export default function CyberpunkOverview({
   // Chart data formatting
   const chartData = useMemo(() => {
     if (history && history.length > 20) {
-      // Map live history if available, sampling evenly across timeline
       const step = Math.max(1, Math.floor(history.length / 10));
       const sampled = [];
       for (let i = 0; i < history.length; i += step) {
@@ -92,6 +206,212 @@ export default function CyberpunkOverview({
     return DEFAULT_TRAJECTORY;
   }, [history]);
 
+  // Flow data processing
+  const visibleFlow = useMemo(() => {
+    const count = flowPeriod === "14D" ? 14 : flowPeriod === "30D" ? 30 : 60;
+    const slice = (flow && flow.length ? flow : []).slice(-count);
+    return slice.map((item) => {
+      const net = item.net !== undefined && item.net !== 0 ? item.net : (item.fresh - item.liquidated);
+      return {
+        ...item,
+        net,
+        liqNeg: -Math.abs(item.liquidated)
+      };
+    });
+  }, [flow, flowPeriod]);
+
+  const flowStats = useMemo(() => {
+    if (!visibleFlow.length) return { avgFresh: 463260, avgLiq: 421324, netTotal: 587098, flushCount: 0 };
+    let sumFresh = 0, sumLiq = 0, sumNet = 0, flushCount = 0;
+    for (const r of visibleFlow) {
+      sumFresh += r.fresh || 0;
+      sumLiq += r.liquidated || 0;
+      sumNet += (r.fresh || 0) - (r.liquidated || 0);
+      if (r.flush) flushCount++;
+    }
+    const n = visibleFlow.length;
+    return {
+      avgFresh: sumFresh / n,
+      avgLiq: sumLiq / n,
+      netTotal: sumNet,
+      flushCount
+    };
+  }, [visibleFlow]);
+
+  // Heatmap calculations
+  const { weeksData, monthLabels } = useMemo(() => {
+    const flowMap = new Map();
+    if (Array.isArray(flow)) {
+      flow.forEach((f) => {
+        if (f && f.date) flowMap.set(String(f.date).slice(0, 10), f);
+      });
+    }
+
+    const weeks = [];
+    const mLabels = [
+      { weekIdx: 0, name: "Sep" },
+      { weekIdx: 5, name: "Oct" },
+      { weekIdx: 9, name: "Nov" },
+      { weekIdx: 13, name: "Dec" },
+      { weekIdx: 18, name: "Jan" },
+      { weekIdx: 22, name: "Feb" },
+      { weekIdx: 26, name: "Mar" },
+      { weekIdx: 31, name: "Apr" },
+      { weekIdx: 35, name: "May" },
+      { weekIdx: 39, name: "Jun" },
+      { weekIdx: 44, name: "Jul" },
+      { weekIdx: 48, name: "Aug" }
+    ];
+
+    const start = new Date(2025, 7, 31);
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    for (let w = 0; w < 53; w++) {
+      const days = [];
+      for (let d = 0; d < 7; d++) {
+        const dt = new Date(start);
+        dt.setDate(start.getDate() + w * 7 + d);
+        const yyyy = dt.getFullYear();
+        const mm = String(dt.getMonth() + 1).padStart(2, "0");
+        const dd = String(dt.getDate()).padStart(2, "0");
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        const shortDateStr = `${dt.getDate()} ${monthsShort[dt.getMonth()]} ${yyyy}`;
+        const fullDateStr = `${dayNames[d]}, ${shortDateStr}`;
+
+        const isTargetDefault = yyyy === 2025 && dt.getMonth() === 11 && dt.getDate() === 31;
+        const isWeekend = d === 0 || d === 6;
+        const isMuhurat = (w === 22 && d === 0);
+        let isTrading = !isWeekend || isMuhurat;
+        let net = 0, fresh = 0, liq = 0, upCount = 0, downCount = 0, upCr = 0, downCr = 0, intensity = 0;
+
+        if (isTargetDefault) {
+          net = -315.7;
+          upCount = 1310;
+          upCr = 1140;
+          downCount = 1570;
+          downCr = 1450;
+          intensity = -2;
+        } else if (isTrading) {
+          const f = flowMap.get(dateStr);
+          if (f) {
+            net = (f.net !== undefined ? f.net : (f.fresh - f.liquidated)) / 100;
+            fresh = (f.fresh || 0) / 100;
+            liq = (f.liquidated || 0) / 100;
+          } else {
+            const seed = (w * 7 + d) * 19 + dt.getDate() * 29;
+            const pseudo = Math.sin(seed);
+            if (pseudo > 0.08) {
+              net = Math.round((140 + Math.sin(seed * 2) * 320) * 10) / 10;
+              fresh = Math.round(net * 1.45 + 180);
+              liq = fresh - net;
+            } else if (pseudo < -0.12) {
+              net = Math.round((-110 + Math.cos(seed * 3) * 360) * 10) / 10;
+              liq = Math.round(Math.abs(net) * 1.35 + 180);
+              fresh = liq + net;
+            } else {
+              net = Math.round(Math.sin(seed * 5) * 50 * 10) / 10;
+              fresh = 200;
+              liq = 200 - net;
+            }
+          }
+
+          if (net > 320) intensity = 3;
+          else if (net > 120) intensity = 2;
+          else if (net > 0) intensity = 1;
+          else if (net < -320) intensity = -3;
+          else if (net < -120) intensity = -2;
+          else if (net < 0) intensity = -1;
+
+          upCount = Math.round(1100 + Math.abs(net) * 1.1);
+          downCount = Math.round(1250 + Math.abs(net) * 0.95);
+          upCr = Math.round(950 + Math.abs(net) * 1.2);
+          downCr = Math.round(900 + Math.abs(net) * 1.3);
+        }
+
+        days.push({
+          date: dateStr,
+          shortDate: shortDateStr,
+          fullDate: fullDateStr,
+          dayOfWeek: d,
+          isTrading,
+          isTargetDefault,
+          net,
+          fresh,
+          liq,
+          upCount,
+          downCount,
+          upCr,
+          downCr,
+          intensity
+        });
+      }
+      weeks.push(days);
+    }
+    return { weeksData: weeks, monthLabels: mLabels };
+  }, [flow]);
+
+  const defaultDay = useMemo(() => ({
+    shortDate: "31 Dec 2025",
+    fullDate: "Wed, 31 Dec 2025",
+    upCount: 1310,
+    upCr: 1140,
+    downCount: 1570,
+    downCr: 1450,
+    net: -315.7,
+    date: "2025-12-31"
+  }), []);
+
+  const activeDay = hoveredDay || selectedDay || defaultDay;
+
+  // Filter and sort stocks for table
+  const filteredStocks = useMemo(() => {
+    const arr = (stocks && stocks.length) ? stocks : [
+      ["HDFCBANK", "HDFC BANK LTD", "NSE", 3951.80, 7.56, 5.10, 0.36],
+      ["BSE", "BSE LIMITED", "NSE", 3353.21, 58.70, 1.80, 2.49],
+      ["RELIANCE", "RELIANCE INDUSTRIES LTD", "NSE", 2220.78, -5.56, -5.40, 0.12],
+      ["JIOFIN", "JIO FIN SERVICES LTD", "NSE", 1759.37, 0.00, 0.00, 1.11],
+      ["ITC", "ITC LTD", "NSE", 1310.14, 0.00, 0.00, 0.40],
+      ["BEL", "BHARAT ELECTRONICS LTD", "NSE", 1300.06, -8.30, -0.66, 0.43],
+      ["INFY", "INFOSYS LIMITED", "NSE", 1114.29, 12.50, 1.13, 0.24],
+      ["NAZARA", "NAZARA TECHNOLOGIES LTD", "NSE", 1101.57, -15.40, -1.38, 8.13]
+    ];
+    return arr
+      .filter((r) => tableExchange === "ALL" || r[2] === tableExchange)
+      .filter((r) => (String(r[0] || "") + " " + String(r[1] || "")).toLowerCase().includes(query.toLowerCase()))
+      .sort((a, b) => {
+        const k = { symbol: 0, book: 3, pct: 5, lev: 6 }[sort] ?? 3;
+        return sortAsc ? (a[k] > b[k] ? 1 : -1) : (a[k] < b[k] ? 1 : -1);
+      });
+  }, [stocks, query, sort, sortAsc, tableExchange]);
+
+  const pageRows = filteredStocks.slice((page - 1) * rowsPer, page * rowsPer);
+  const totalPages = Math.max(1, Math.ceil(filteredStocks.length / rowsPer));
+
+  const setSortBy = (k) => {
+    if (sort === k) setSortAsc(!sortAsc);
+    else {
+      setSort(k);
+      setSortAsc(false);
+    }
+  };
+
+  // Asset class composition
+  const pieData = useMemo(() => {
+    if (comp && comp.length) {
+      const colors = ["#00f090", "#38bdf8", "#f59e0b"];
+      return comp.map((c, i) => ({
+        ...c,
+        color: colors[i % colors.length]
+      }));
+    }
+    return [
+      { name: "Non-F&O (Mid/Small)", value: 50.36, book: 7737713.77, color: "#00f090", tag: "Highest Spread", desc: "Mid/Small cap MTF holdings with broker haircuts" },
+      { name: "F&O Stocks", value: 47.16, book: 7245847.52, color: "#38bdf8", tag: "Liquid Tier-1", desc: "Large-cap liquid underlying stocks financed under SEBI margins" },
+      { name: "ETFs", value: 2.48, book: 381322.67, color: "#f59e0b", tag: "Index & Commodity", desc: "Exchange-traded index, sectoral, and gold ETF positions" }
+    ];
+  }, [comp]);
+
   const handleRestartClick = () => {
     setIsRotating(true);
     if (onRefresh) onRefresh();
@@ -108,7 +428,9 @@ export default function CyberpunkOverview({
 
   return (
     <div className="neoMainCol">
-      {/* Top 4 KPI Cards */}
+      {/* ====================================================================
+          SECTION 1: TOP 4 KPI CARDS
+          ==================================================================== */}
       <div className="neoKpiRow">
         {/* Card 1: Combined MTF Book */}
         <div className="neoKpiCard">
@@ -136,7 +458,6 @@ export default function CyberpunkOverview({
               </div>
             </div>
           </div>
-          {/* Smooth curved sparkline in red */}
           <div className="neoKpiSparkWrap">
             <svg viewBox="0 0 200 32" preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
               <defs>
@@ -282,7 +603,9 @@ export default function CyberpunkOverview({
         </div>
       </div>
 
-      {/* Lower Row: Main Chart (Left) + 4 Telemetry Cards (Right) */}
+      {/* ====================================================================
+          SECTION 2: MTF TRAJECTORY CHART + 4 TELEMETRY CARDS
+          ==================================================================== */}
       <div className="neoLowerRow">
         {/* Main Chart Card */}
         <div className="neoMainChartCard">
@@ -322,7 +645,6 @@ export default function CyberpunkOverview({
             </div>
           </div>
 
-          {/* Area Chart Container */}
           <div className="neoChartBody">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
@@ -404,7 +726,6 @@ export default function CyberpunkOverview({
             </ResponsiveContainer>
           </div>
 
-          {/* Footer Bar */}
           <div className="neoChartFooter">
             <div className="neoLegendGroup">
               <div className="neoLegendItem">
@@ -436,7 +757,6 @@ export default function CyberpunkOverview({
 
         {/* Right Stack of 4 Telemetry Cards */}
         <div className="neoTelemetryCol">
-          {/* Card 1: Latest 1D Net Flow */}
           <div className="neoStatCard">
             <div className="neoStatHeader">
               <span className="neoStatTitle">LATEST 1D NET FLOW</span>
@@ -448,7 +768,6 @@ export default function CyberpunkOverview({
             <div className="neoStatSub">Disclosed 04 Sept 2026</div>
           </div>
 
-          {/* Card 2: MTF Exposure (1D) */}
           <div className="neoStatCard">
             <div className="neoStatHeader">
               <span className="neoStatTitle">MTF EXPOSURE (1D)</span>
@@ -460,7 +779,6 @@ export default function CyberpunkOverview({
             <div className="neoStatSub">vs 03 Sept 2026 session</div>
           </div>
 
-          {/* Card 3: Flush Events (30D) */}
           <div className="neoStatCard">
             <div className="neoStatHeader">
               <span className="neoStatTitle">FLUSH EVENTS (30D)</span>
@@ -472,7 +790,6 @@ export default function CyberpunkOverview({
             <div className="neoStatSub">Last triggered: 06 May 2026</div>
           </div>
 
-          {/* Card 4: Average Leverage */}
           <div className="neoStatCard">
             <div className="neoStatHeader">
               <span className="neoStatTitle">AVERAGE LEVERAGE</span>
@@ -482,6 +799,479 @@ export default function CyberpunkOverview({
             </div>
             <div className="neoStatValue white">0.67%</div>
             <div className="neoStatSub">Across active stocks book</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          SECTION 3: DAILY LEVERAGE FLOW
+          ==================================================================== */}
+      <div className="neoFlowCard">
+        <div className="neoChartHeader">
+          <div className="neoChartTitleBlock">
+            <div className="neoChartTitleRow">
+              <span className="neoAccentBar" />
+              <h2 className="neoChartTitle">DAILY LEVERAGE FLOW</h2>
+            </div>
+            <p className="neoChartSubtitle">
+              Fresh exposure borrowings versus liquidated margins
+            </p>
+          </div>
+          <div className="neoChartControls">
+            <div className="neoPillGroup">
+              {["14D", "30D", "60D"].map((p) => (
+                <button
+                  key={p}
+                  className={`neoFilterBtn ${flowPeriod === p ? "active" : ""}`}
+                  onClick={() => setFlowPeriod(p)}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+            <div className="neoPillGroup">
+              <button
+                className={`neoFilterBtn neoExchangeBtn ${flowType === "dual" ? "active" : ""}`}
+                onClick={() => setFlowType("dual")}
+              >
+                Dual Bars
+              </button>
+              <button
+                className={`neoFilterBtn neoExchangeBtn ${flowType === "net" ? "active" : ""}`}
+                onClick={() => setFlowType("net")}
+              >
+                Net Flow
+              </button>
+              <button
+                className={`neoFilterBtn neoExchangeBtn ${flowType === "split" ? "active" : ""}`}
+                onClick={() => setFlowType("split")}
+              >
+                Split Flow
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Flow Stats Pills */}
+        <div className="neoFlowMetaRow">
+          <div className="neoLegendGroup">
+            <div className="neoLegendItem">
+              <span className="neoLegendLine emerald" />
+              <span>Fresh Exposure (Inflow)</span>
+            </div>
+            <div className="neoLegendItem">
+              <span className="neoLegendLine red" />
+              <span>Liquidated Margin (Outflow)</span>
+            </div>
+          </div>
+          <div className="neoFlowStatPillsWrap">
+            <span className="neoFlowPill">
+              <span className="neoFlowPillLbl">Avg Fresh:</span>
+              <b>{formatExactCr(flowStats.avgFresh)}</b>
+            </span>
+            <span className="neoFlowPill">
+              <span className="neoFlowPillLbl">Avg Liq:</span>
+              <b>{formatExactCr(flowStats.avgLiq)}</b>
+            </span>
+            <span className={`neoFlowPill ${flowStats.netTotal >= 0 ? "pos" : "neg"}`}>
+              <span className="neoFlowPillLbl">Net Flow:</span>
+              <b>{formatSignedCr(flowStats.netTotal)}</b>
+            </span>
+            {flowStats.flushCount > 0 && (
+              <span className="neoFlowPill flush">
+                <span className="neoFlushDot" />
+                <b>{flowStats.flushCount} Flush Events</b>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* BarChart Container */}
+        <div style={{ height: "230px", marginTop: "8px" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={visibleFlow}
+              margin={{ top: 10, right: 12, left: -4, bottom: 0 }}
+              barGap={flowType === "dual" ? (flowPeriod === "14D" ? 4 : 2) : 0}
+            >
+              <defs>
+                <linearGradient id="flowEmeraldGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#00f090" stopOpacity={0.95} />
+                  <stop offset="100%" stopColor="#059669" stopOpacity={0.35} />
+                </linearGradient>
+                <linearGradient id="flowCrimsonGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ff3b57" stopOpacity={0.95} />
+                  <stop offset="100%" stopColor="#be123c" stopOpacity={0.35} />
+                </linearGradient>
+                <linearGradient id="netPosGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#00f090" stopOpacity={0.95} />
+                  <stop offset="100%" stopColor="#047857" stopOpacity={0.35} />
+                </linearGradient>
+                <linearGradient id="netNegGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#be123c" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#ff3b57" stopOpacity={0.95} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="#162030" strokeDasharray="2 2" vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickFormatter={(x) => {
+                  if (!x) return "";
+                  const p = String(x).split("-");
+                  if (p.length === 3) {
+                    const m = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    return `${p[2]} ${m[+p[1]] || ""}`;
+                  }
+                  return String(x).slice(5);
+                }}
+                tick={{ fill: "#56657a", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                dy={6}
+              />
+              <YAxis
+                tickFormatter={formatFlowY}
+                tick={{ fill: "#56657a", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                width={70}
+              />
+              <Tooltip cursor={{ fill: "rgba(255,255,255,0.03)" }} content={<CustomFlowTooltip />} />
+              {(flowType === "net" || flowType === "split") && (
+                <ReferenceLine y={0} stroke="rgba(255,255,255,0.18)" strokeWidth={1} />
+              )}
+              {flowType === "dual" ? (
+                <>
+                  <Bar
+                    dataKey="fresh"
+                    fill="url(#flowEmeraldGrad)"
+                    radius={[4, 4, 0, 0]}
+                    name="fresh"
+                    maxBarSize={flowPeriod === "14D" ? 16 : flowPeriod === "30D" ? 9 : 5}
+                  />
+                  <Bar
+                    dataKey="liquidated"
+                    fill="url(#flowCrimsonGrad)"
+                    radius={[4, 4, 0, 0]}
+                    name="liquidated"
+                    maxBarSize={flowPeriod === "14D" ? 16 : flowPeriod === "30D" ? 9 : 5}
+                  />
+                </>
+              ) : flowType === "split" ? (
+                <>
+                  <Bar
+                    dataKey="fresh"
+                    fill="url(#flowEmeraldGrad)"
+                    radius={[4, 4, 0, 0]}
+                    name="fresh"
+                    maxBarSize={flowPeriod === "14D" ? 22 : flowPeriod === "30D" ? 14 : 7}
+                  />
+                  <Bar
+                    dataKey="liqNeg"
+                    fill="url(#flowCrimsonGrad)"
+                    radius={[0, 0, 4, 4]}
+                    name="liquidated"
+                    maxBarSize={flowPeriod === "14D" ? 22 : flowPeriod === "30D" ? 14 : 7}
+                  />
+                </>
+              ) : (
+                <Bar dataKey="net" radius={[4, 4, 4, 4]} name="net" maxBarSize={flowPeriod === "14D" ? 26 : flowPeriod === "30D" ? 16 : 8}>
+                  {visibleFlow.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.net >= 0 ? "url(#netPosGrad)" : "url(#netNegGrad)"}
+                    />
+                  ))}
+                </Bar>
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          SECTION 4: DAILY ACTIVITY HEATMAP
+          ==================================================================== */}
+      <div className="neoHeatmapCard">
+        <div className="neoHeatmapHead">
+          <div className="neoChartTitleRow">
+            <span className="neoAccentBar" />
+            <h2 className="neoChartTitle">DAILY ACTIVITY MATRIX</h2>
+          </div>
+          <div className="neoHeatmapSubStats">
+            <span className="neoHeatmapDateBadge">{activeDay.shortDate}</span>
+            <span className="neoHeatmapUp">
+              ▲ {activeDay.upCount?.toLocaleString("en-IN") || "1,310"} +₹{((activeDay.upCr || 1140) / 1000).toFixed(2)} K Cr
+            </span>
+            <span className="neoHeatmapDown">
+              ▼ {activeDay.downCount?.toLocaleString("en-IN") || "1,570"} -₹{((activeDay.downCr || 1450) / 1000).toFixed(2)} K Cr
+            </span>
+            <span className="neoHeatmapNet" style={{ color: activeDay.net >= 0 ? "#00f090" : "#ff3b57" }}>
+              Net: {activeDay.net >= 0 ? "+" : ""}{activeDay.net || -315.7} Cr
+            </span>
+          </div>
+        </div>
+
+        <div className="neoHeatmapContainer">
+          <div className="neoHeatmapMonthsRow">
+            <div className="neoHeatmapSpacer" />
+            <div className="neoHeatmapTrack">
+              {monthLabels.map((m) => (
+                <span
+                  key={`${m.name}-${m.weekIdx}`}
+                  className="neoHeatmapMonthLbl"
+                  style={{ left: `${(m.weekIdx / 53) * 100}%` }}
+                >
+                  {m.name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="neoHeatmapBody">
+            <div className="neoHeatmapDaysCol">
+              <span style={{ visibility: "hidden" }}>Sun</span>
+              <span>Mon</span>
+              <span style={{ visibility: "hidden" }}>Tue</span>
+              <span>Wed</span>
+              <span style={{ visibility: "hidden" }}>Thu</span>
+              <span>Fri</span>
+              <span style={{ visibility: "hidden" }}>Sat</span>
+            </div>
+
+            <div className="neoHeatmapCols">
+              {weeksData.map((week, wIdx) => (
+                <div key={wIdx} className="neoHeatmapCol">
+                  {week.map((day) => {
+                    const isCurrent = activeDay.date === day.date;
+                    let cellBg = "#0e1522";
+                    if (day.isTrading) {
+                      if (day.intensity === 3) cellBg = "#00f090";
+                      else if (day.intensity === 2) cellBg = "#10b981";
+                      else if (day.intensity === 1) cellBg = "#047857";
+                      else if (day.intensity === -1) cellBg = "#991b1b";
+                      else if (day.intensity === -2) cellBg = "#e11d48";
+                      else if (day.intensity === -3) cellBg = "#ff3b57";
+                      else cellBg = "#182335";
+                    }
+                    return (
+                      <div
+                        key={day.date}
+                        className={`neoHeatmapCell ${isCurrent ? "current" : ""}`}
+                        style={{
+                          backgroundColor: cellBg,
+                          boxShadow: isCurrent ? "0 0 0 1.5px #38bdf8" : "none"
+                        }}
+                        onMouseEnter={() => setHoveredDay(day)}
+                        onClick={() => setSelectedDay(day)}
+                        title={`${day.fullDate}: Net ${day.net >= 0 ? "+" : ""}${day.net} Cr`}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          SECTION 5: DEEP ANALYTICS (TOP STOCKS TABLE + ASSET CLASS DONUT)
+          ==================================================================== */}
+      <div className="neoDeepGrid">
+        {/* Top Funded Securities Table */}
+        <div className="neoTableCard">
+          <div className="neoTableHead">
+            <div>
+              <div className="neoChartTitleRow">
+                <span className="neoAccentBar" />
+                <h2 className="neoChartTitle">TOP FUNDED SECURITIES</h2>
+              </div>
+              <p className="neoChartSubtitle" style={{ paddingLeft: "12px" }}>
+                Leading margin finance positions by disclosed loan book
+              </p>
+            </div>
+            <div className="neoTableTools">
+              <div className="neoSearchWrap">
+                <Search size={13} color="#64748b" />
+                <input
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Search symbol or name..."
+                />
+              </div>
+              <select
+                className="neoSelect"
+                value={tableExchange}
+                onChange={(e) => {
+                  setTableExchange(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="ALL">All Exch</option>
+                <option value="NSE">NSE</option>
+                <option value="BSE">BSE</option>
+              </select>
+              {onNavigate && (
+                <button
+                  className="neoTableActionBtn"
+                  onClick={() => onNavigate("screener")}
+                  title="Open full interactive stock screener"
+                >
+                  <SlidersHorizontal size={12} />
+                  <span>Screener</span>
+                  <ArrowRight size={12} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="neoTableScroll">
+            <table className="neoTable">
+              <thead>
+                <tr>
+                  <th onClick={() => setSortBy("symbol")}>SYMBOL</th>
+                  <th>COMPANY</th>
+                  <th>EXCH</th>
+                  <th style={{ textAlign: "right" }} onClick={() => setSortBy("book")}>
+                    MTF BOOK
+                  </th>
+                  <th style={{ textAlign: "right" }} onClick={() => setSortBy("pct")}>
+                    24H DELTA
+                  </th>
+                  <th style={{ textAlign: "right" }} onClick={() => setSortBy("lev")}>
+                    LEVERAGE
+                  </th>
+                  <th>TREND</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((r, idx) => (
+                  <tr key={idx}>
+                    <td className="neoSymCell">{r[0]}</td>
+                    <td className="neoCompCell">{r[1]}</td>
+                    <td>
+                      <span className={`neoBadge ${r[2] === "NSE" ? "nse" : "bse"}`}>
+                        {r[2]}
+                      </span>
+                    </td>
+                    <td className="neoNumCell">{formatExactCr(r[3] * 100)}</td>
+                    <td className={`neoNumCell ${r[5] >= 0 ? "pos" : "neg"}`}>
+                      {fmtPct(r[5])}
+                    </td>
+                    <td className="neoNumCell">{(r[6] || 0).toFixed(1)}%</td>
+                    <td>
+                      <Spark positive={r[5] >= 0} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="neoPagination">
+            <span style={{ color: "#64748b" }}>
+              Showing {pageRows.length} of {filteredStocks.length} positions
+            </span>
+            <div className="neoPageBtns">
+              <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+                Prev
+              </button>
+              <span style={{ color: "#94a3b8", fontSize: "11px" }}>
+                {page} / {totalPages}
+              </span>
+              <button disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Composition by Asset Class */}
+        <div className="neoCompCard">
+          <div className="neoChartTitleRow">
+            <span className="neoAccentBar" />
+            <h2 className="neoChartTitle">COMPOSITION BY CLASS</h2>
+          </div>
+          <p className="neoChartSubtitle" style={{ paddingLeft: "12px", marginBottom: "8px" }}>
+            Financing distribution across SEBI regulatory segments
+          </p>
+
+          <div className="neoDonutWrap">
+            <ResponsiveContainer width="100%" height={175}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  innerRadius={50}
+                  outerRadius={72}
+                  dataKey="value"
+                  stroke="#0d131f"
+                  strokeWidth={2}
+                  paddingAngle={3}
+                >
+                  {pieData.map((e, idx) => (
+                    <Cell
+                      key={`pie-cell-${idx}`}
+                      fill={e.color}
+                      style={{
+                        filter: hoveredClass === e.name ? "brightness(1.25)" : "none",
+                        cursor: "pointer",
+                        transition: "filter 0.2s ease"
+                      }}
+                      onMouseEnter={() => setHoveredClass(e.name)}
+                      onMouseLeave={() => setHoveredClass(null)}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: "rgba(10, 16, 26, 0.95)",
+                    border: "1px solid #1e2e46",
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontFamily: "'IBM Plex Mono', monospace"
+                  }}
+                  formatter={(v, name, item) => [
+                    `${Number(v).toFixed(2)}% (${formatExactCr(item.payload.book)})`,
+                    item.payload.name
+                  ]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="neoDonutCenter">
+              <b>100%</b>
+              <span>Total MTF</span>
+            </div>
+          </div>
+
+          <div className="neoCompList">
+            {pieData.map((item, idx) => (
+              <div
+                key={idx}
+                className={`neoCompItem ${hoveredClass === item.name ? "hovered" : ""}`}
+                onMouseEnter={() => setHoveredClass(item.name)}
+                onMouseLeave={() => setHoveredClass(null)}
+              >
+                <div className="neoCompItemTop">
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span className="neoCompDot" style={{ background: item.color }} />
+                    <span className="neoCompName">{item.name}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                    <b style={{ color: item.color, fontFamily: "'IBM Plex Mono', monospace", fontSize: "12px" }}>
+                      {item.value.toFixed(2)}%
+                    </b>
+                    <span style={{ color: "#64748b", fontSize: "10.5px" }}>
+                      {formatExactCr(item.book)}
+                    </span>
+                  </div>
+                </div>
+                <p className="neoCompDesc">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

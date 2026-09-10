@@ -827,6 +827,14 @@ function App(){
               <Calculator size={16} color={tab === "calc" ? "#00f090" : "#64748b"} />
               <span>Calculators & Margin</span>
             </button>
+
+            <button
+              className={`neoNavItem ${tab === "about" || tab === "methodology" ? "active" : ""}`}
+              onClick={() => setTab("about")}
+            >
+              <CircleHelp size={16} color={tab === "about" || tab === "methodology" ? "#00f090" : "#64748b"} />
+              <span>About & Methodology</span>
+            </button>
           </div>
 
           {/* MTF INSIGHT Card */}
@@ -909,10 +917,12 @@ function App(){
             history={history}
             flow={flow}
             stocks={stocks}
+            comp={comp}
             activeSecuritiesCount={activeSecuritiesCount}
             nseSecCount={nseSecCount}
             bseSecCount={bseSecCount}
             onRefresh={fetchDashboardData}
+            onNavigate={setTab}
           />
         )}
       </div>

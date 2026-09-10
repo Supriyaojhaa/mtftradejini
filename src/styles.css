@@ -8898,3 +8898,489 @@ html[data-theme=light] .mobileDrawerHeader {
   }
 }
 
+/* ==========================================================================
+   Cyberpunk Neo-Terminal Deep Analytics Features (Flow, Heatmap, Table, Donut)
+   ========================================================================== */
+
+/* Daily Leverage Flow Card */
+.neoFlowCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 16px 20px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.neoFlowMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.neoLegendLine.red {
+  background: #ff3b57;
+  box-shadow: 0 0 6px #ff3b57;
+}
+
+.neoFlowStatPillsWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.neoFlowPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #090e17;
+  border: 1px solid #172233;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: "IBM Plex Mono", monospace;
+  color: #8b9cb4;
+}
+
+.neoFlowPill b {
+  color: #ffffff;
+}
+
+.neoFlowPill.pos b {
+  color: #00f090;
+}
+
+.neoFlowPill.neg b {
+  color: #ff3b57;
+}
+
+.neoFlowPill.flush {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.neoFlowPill.flush b {
+  color: #f59e0b;
+}
+
+.neoFlushDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+/* Daily Activity Matrix Heatmap */
+.neoHeatmapCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.neoHeatmapHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.neoHeatmapSubStats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.neoHeatmapDateBadge {
+  background: #141c2b;
+  border: 1px solid #1e2d42;
+  color: #cbd5e1;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.neoHeatmapUp {
+  color: #00f090;
+  font-weight: 600;
+}
+
+.neoHeatmapDown {
+  color: #ff3b57;
+  font-weight: 600;
+}
+
+.neoHeatmapNet {
+  font-weight: 700;
+}
+
+.neoHeatmapContainer {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.neoHeatmapMonthsRow {
+  display: flex;
+  margin-bottom: 4px;
+}
+
+.neoHeatmapSpacer {
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.neoHeatmapTrack {
+  position: relative;
+  flex: 1;
+  height: 16px;
+}
+
+.neoHeatmapMonthLbl {
+  position: absolute;
+  font-size: 10px;
+  color: #56657a;
+  font-weight: 600;
+}
+
+.neoHeatmapBody {
+  display: flex;
+  gap: 6px;
+}
+
+.neoHeatmapDaysCol {
+  width: 24px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 86px;
+  font-size: 9px;
+  color: #56657a;
+}
+
+.neoHeatmapCols {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+}
+
+.neoHeatmapCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.neoHeatmapCell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2.5px;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.neoHeatmapCell:hover {
+  transform: scale(1.35);
+  filter: brightness(1.3);
+  z-index: 10;
+}
+
+/* Deep Analytics 2-Column Grid */
+.neoDeepGrid {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* Top Funded Table */
+.neoTableCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 16px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.neoTableHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.neoTableTools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.neoSearchWrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #090e17;
+  border: 1px solid #172233;
+  border-radius: 6px;
+  padding: 4px 8px;
+  width: 170px;
+}
+
+.neoSearchWrap input {
+  background: transparent;
+  border: none;
+  color: #f8fafc;
+  font-size: 11px;
+  width: 100%;
+  outline: none;
+}
+
+.neoSelect {
+  background: #090e17;
+  border: 1px solid #172233;
+  color: #cbd5e1;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+.neoTableActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #141f30;
+  border: 1px solid #1e304a;
+  color: #38bdf8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.neoTableActionBtn:hover {
+  background: #1c2b42;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.neoTableScroll {
+  overflow-x: auto;
+}
+
+.neoTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+.neoTable th {
+  text-align: left;
+  padding: 8px 10px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #172233;
+  cursor: pointer;
+}
+
+.neoTable th:hover {
+  color: #cbd5e1;
+}
+
+.neoTable td {
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(23, 34, 51, 0.7);
+  white-space: nowrap;
+}
+
+.neoSymCell {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.neoCompCell {
+  color: #8b9cb4;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neoBadge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.neoBadge.nse {
+  background: rgba(56, 189, 248, 0.14);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.neoBadge.bse {
+  background: rgba(245, 158, 11, 0.14);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.neoNumCell {
+  font-family: "IBM Plex Mono", monospace;
+  text-align: right;
+  color: #f1f5f9;
+}
+
+.neoNumCell.pos {
+  color: #00f090;
+}
+
+.neoNumCell.neg {
+  color: #ff3b57;
+}
+
+.neoPagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  font-size: 11px;
+}
+
+.neoPageBtns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.neoPageBtns button {
+  background: #090e17;
+  border: 1px solid #172233;
+  color: #8b9cb4;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.neoPageBtns button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Composition Card */
+.neoCompCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.neoDonutWrap {
+  position: relative;
+  height: 175px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neoDonutCenter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.neoDonutCenter b {
+  display: block;
+  font-size: 17px;
+  font-family: "IBM Plex Mono", monospace;
+  color: #ffffff;
+}
+
+.neoDonutCenter span {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.neoCompList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.neoCompItem {
+  background: #090e17;
+  border: 1px solid #172233;
+  border-radius: 7px;
+  padding: 8px 10px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.neoCompItem:hover, .neoCompItem.hovered {
+  border-color: #38bdf8;
+  background: #111a28;
+}
+
+.neoCompItemTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.neoCompDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.neoCompName {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.neoCompDesc {
+  font-size: 10px;
+  color: #64748b;
+  margin: 3px 0 0 13px;
+  line-height: 1.3;
+}
+
+@media (max-width: 1280px) {
+  .neoDeepGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
