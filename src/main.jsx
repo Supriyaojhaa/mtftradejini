@@ -594,7 +594,7 @@ function App(){
       setData({ summary, history: normalizeTotals(t), flow: normalizeFlow(f), comp: normalizeComp(c), snapshot: s, screener: scr });
     } catch (e) {
       setData({
-        summary: { book: { combined: 15314074, nse: 14642379, bse: 671695 }, asOf: "2026-09-04" },
+        summary: { book: { combined: 15411892, nse: 14731203, bse: 680689 }, asOf: "2026-09-08" },
         history: fallbackHistory,
         flow: fallbackFlow,
         comp: fallbackComp,
@@ -610,24 +610,24 @@ function App(){
     fetchDashboardData();
   }, []);
 
-  const summary = data?.summary || { book: { combined: 15314074, nse: 14642379, bse: 671695 }, asOf: "2026-09-04" };
+  const summary = data?.summary || { book: { combined: 15411892, nse: 14731203, bse: 680689 }, asOf: "2026-09-08" };
   const book = summary.book || {}; const combined = num(book.combined), nse = num(book.nse), bse = num(book.bse);
  const history=(data?.history?.length?data.history:fallbackHistory);
  const flow=(data?.flow?.length?data.flow:fallbackFlow);
  const comp=(data?.comp?.length?data.comp:fallbackComp);
  const latest=(history[history.length - 1])||{}, previous=(history[history.length - 2])||{};
 
- const changeCombined = (latest.combined && previous.combined) ? (latest.combined - previous.combined) : (combined - (num(previous.combined) || combined * 0.988));
- const pctCombined = previous.combined ? (changeCombined / previous.combined) * 100 : 0.07;
+ const changeCombined = (latest.combined && previous.combined) ? (latest.combined - previous.combined) : (combined - (num(previous.combined) || combined * 0.989));
+ const pctCombined = previous.combined ? (changeCombined / previous.combined) * 100 : 0.10;
 
- const changeNse = (latest.nse && previous.nse) ? (latest.nse - previous.nse) : (nse - (num(previous.nse) || nse * 0.988));
- const pctNse = previous.nse ? (changeNse / previous.nse) * 100 : 0.05;
+ const changeNse = (latest.nse && previous.nse) ? (latest.nse - previous.nse) : (nse - (num(previous.nse) || nse * 0.989));
+ const pctNse = previous.nse ? (changeNse / previous.nse) * 100 : 0.10;
 
- const changeBse = (latest.bse && previous.bse) ? (latest.bse - previous.bse) : (bse - (num(previous.bse) || bse * 0.988));
- const pctBse = previous.bse ? (changeBse / previous.bse) * 100 : 0.39;
+ const changeBse = (latest.bse && previous.bse) ? (latest.bse - previous.bse) : (bse - (num(previous.bse) || bse * 0.989));
+ const pctBse = previous.bse ? (changeBse / previous.bse) * 100 : 0.13;
 
- const nseSecCount = latest.nseSec || 2163;
- const bseSecCount = latest.bseSec || 1854;
+ const nseSecCount = latest.nseSec || 2176;
+ const bseSecCount = latest.bseSec || 1863;
  const activeSecuritiesCount = nseSecCount + bseSecCount;
 
  const displayDate=summary.asOf||latest.date;
@@ -868,37 +868,52 @@ function App(){
           <div className="neoInsightCard">
             <div className="neoInsightHeader">
               <span className="neoInsightTitle">MTF INSIGHT</span>
-              <div className="neoPulseDot" />
+              <div
+                className="neoPulseDot"
+                style={{
+                  background: changeCombined >= 0 ? "#00f090" : "#ff3b57",
+                  boxShadow: `0 0 8px ${changeCombined >= 0 ? "#00f090" : "#ff3b57"}`
+                }}
+              />
             </div>
-            <div className="neoInsightSub">MTF book contracted</div>
-            <div className="neoInsightHero">-0.12%</div>
-            <div className="neoInsightDetail">today (-₹180.03 Cr)</div>
+            <div className="neoInsightSub">
+              {changeCombined >= 0 ? "MTF book expanded" : "MTF book contracted"}
+            </div>
+            <div
+              className="neoInsightHero"
+              style={{ color: changeCombined >= 0 ? "#00f090" : "#ff3b57" }}
+            >
+              {fmtPct(pctCombined)}
+            </div>
+            <div className="neoInsightDetail">
+              today ({formatSignedCr(changeCombined)})
+            </div>
 
             {/* Smooth Wavy Sparkline */}
             <div className="neoInsightSpark">
               <svg viewBox="0 0 200 48" preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
                 <defs>
                   <linearGradient id="insightWaveGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ff3b57" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#ff3b57" stopOpacity="0.0" />
+                    <stop offset="0%" stopColor={changeCombined >= 0 ? "#00f090" : "#ff3b57"} stopOpacity={0.35} />
+                    <stop offset="100%" stopColor={changeCombined >= 0 ? "#00f090" : "#ff3b57"} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <path
-                  d="M 0,16 Q 45,18 90,32 T 180,24 T 200,12"
+                  d={changeCombined >= 0 ? "M 0,36 Q 45,30 90,16 T 180,20 T 200,8" : "M 0,16 Q 45,18 90,32 T 180,24 T 200,12"}
                   fill="none"
-                  stroke="#ff3b57"
+                  stroke={changeCombined >= 0 ? "#00f090" : "#ff3b57"}
                   strokeWidth="2.2"
                   strokeLinecap="round"
                 />
                 <path
-                  d="M 0,16 Q 45,18 90,32 T 180,24 T 200,12 L 200,48 L 0,48 Z"
+                  d={changeCombined >= 0 ? "M 0,36 Q 45,30 90,16 T 180,20 T 200,8 L 200,48 L 0,48 Z" : "M 0,16 Q 45,18 90,32 T 180,24 T 200,12 L 200,48 L 0,48 Z"}
                   fill="url(#insightWaveGrad)"
                 />
               </svg>
             </div>
 
             <div className="neoInsightFooter">
-              <span>vs 03 Sept 2026</span>
+              <span>vs {fmtDate(previous.date) || "07 Sept 2026"}</span>
               <span style={{ fontWeight: 600 }}>1D EOD</span>
             </div>
           </div>

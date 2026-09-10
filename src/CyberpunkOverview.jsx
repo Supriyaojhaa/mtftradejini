@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import {
   TrendingUp,
+  TrendingDown,
   ArrowRight,
   Activity,
   CalendarDays,
@@ -82,6 +83,11 @@ function fmtDate(d) {
 
 function fmtPct(v) {
   return `${v >= 0 ? "+" : ""}${Number(v).toFixed(2)}%`;
+}
+
+function num(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
 }
 
 function Spark({ positive }) {
@@ -195,20 +201,100 @@ export default function CyberpunkOverview({
   const [hoveredDay, setHoveredDay] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  // Exact Cockpit figures
-  const totalBookStr = "1,53,140.74";
-  const totalDeltaCrStr = "-180.03";
-  const totalDeltaPctStr = "-0.12%";
+  // Dynamic Cockpit figures from live history and summary
+  const latest = useMemo(() => {
+    return (history && history.length ? history[history.length - 1] : null) || {};
+  }, [history]);
 
-  const nseBookStr = "1,46,423.79";
-  const nseDeltaCrStr = "-180.54";
-  const nseDeltaPctStr = "-0.12%";
-  const nseShareStr = "95.6%";
+  const previous = useMemo(() => {
+    return (history && history.length > 1 ? history[history.length - 2] : null) || {};
+  }, [history]);
 
-  const bseBookStr = "6,716.95";
-  const bseDeltaCrStr = "+0.52";
-  const bseDeltaPctStr = "+0.01%";
-  const bseShareStr = "4.4%";
+  const combinedBookLakh = useMemo(() => {
+    return summary?.book?.combined ? num(summary.book.combined) : (latest.combined || 15411892);
+  }, [summary, latest]);
+
+  const nseBookLakh = useMemo(() => {
+    return summary?.book?.nse ? num(summary.book.nse) : (latest.nse || 14731203);
+  }, [summary, latest]);
+
+  const bseBookLakh = useMemo(() => {
+    return summary?.book?.bse ? num(summary.book.bse) : (latest.bse || 680689);
+  }, [summary, latest]);
+
+  const changeCombined = useMemo(() => {
+    return (latest.combined && previous.combined)
+      ? (latest.combined - previous.combined)
+      : (combinedBookLakh - (previous.combined || combinedBookLakh * 0.989));
+  }, [latest, previous, combinedBookLakh]);
+
+  const pctCombined = useMemo(() => {
+    return previous.combined ? (changeCombined / previous.combined) * 100 : 0.10;
+  }, [changeCombined, previous]);
+
+  const changeNse = useMemo(() => {
+    return (latest.nse && previous.nse)
+      ? (latest.nse - previous.nse)
+      : (nseBookLakh - (previous.nse || nseBookLakh * 0.989));
+  }, [latest, previous, nseBookLakh]);
+
+  const pctNse = useMemo(() => {
+    return previous.nse ? (changeNse / previous.nse) * 100 : 0.10;
+  }, [changeNse, previous]);
+
+  const changeBse = useMemo(() => {
+    return (latest.bse && previous.bse)
+      ? (latest.bse - previous.bse)
+      : (bseBookLakh - (previous.bse || bseBookLakh * 0.989));
+  }, [latest, previous, bseBookLakh]);
+
+  const pctBse = useMemo(() => {
+    return previous.bse ? (changeBse / previous.bse) * 100 : 0.13;
+  }, [changeBse, previous]);
+
+  const totalBookStr = (combinedBookLakh / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const totalDeltaCrStr = formatSignedCr(changeCombined);
+  const totalDeltaPctStr = fmtPct(pctCombined);
+
+  const nseBookStr = (nseBookLakh / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const nseDeltaCrStr = formatSignedCr(changeNse);
+  const nseDeltaPctStr = fmtPct(pctNse);
+  const nseShareStr = `${((nseBookLakh / (combinedBookLakh || 1)) * 100).toFixed(1)}%`;
+
+  const bseBookStr = (bseBookLakh / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const bseDeltaCrStr = formatSignedCr(changeBse);
+  const bseDeltaPctStr = fmtPct(pctBse);
+  const bseShareStr = `${((bseBookLakh / (combinedBookLakh || 1)) * 100).toFixed(1)}%`;
+
+  const totalSecuritiesCount = (activeSecuritiesCount || (latest.nseSec ? (latest.nseSec + latest.bseSec) : 4039));
+  const activeNseSec = nseSecCount || latest.nseSec || 2176;
+  const activeBseSec = bseSecCount || latest.bseSec || 1863;
+
+  // Latest flow for right telemetry card
+  const latestFlow = (flow && flow.length ? flow[flow.length - 1] : null) || {};
+  const latestNetFlow = latestFlow.net !== undefined ? latestFlow.net : ((latestFlow.fresh || 0) - (latestFlow.liquidated || 0));
+  const latestFlowDate = latestFlow.date ? fmtDate(latestFlow.date) : fmtDate(summary?.asOf || latest.date);
+  const prevSessionDate = previous.date ? fmtDate(previous.date) : "07 Sept 2026";
+
+  const flow30D = useMemo(() => (flow && flow.length ? flow.slice(-30) : []), [flow]);
+  const flushCount30D = useMemo(() => flow30D.filter((x) => x.flush).length, [flow30D]);
+  const lastFlush = useMemo(() => {
+    if (!flow || !flow.length) return null;
+    const fl = flow.filter((x) => x.flush);
+    return fl.length ? fl[fl.length - 1] : null;
+  }, [flow]);
+
+  const avgLeverage = useMemo(() => {
+    if (!stocks || !stocks.length) return 0.67;
+    const levs = stocks.map((s) => s[6]).filter((v) => v > 0);
+    if (!levs.length) return 0.67;
+    return levs.reduce((a, b) => a + b, 0) / levs.length;
+  }, [stocks]);
+
+  const maxHistorical = useMemo(() => {
+    if (!history || !history.length) return 154118.92;
+    return Math.max(...history.map((h) => (h.combined || 0) / 100));
+  }, [history]);
 
   // Chart data formatting
   const chartData = useMemo(() => {
@@ -225,12 +311,15 @@ export default function CyberpunkOverview({
           bse: Number((item.bse / 100).toFixed(2))
         });
       }
-      sampled.push({
-        year: "2026",
-        combined: 153140.74,
-        nse: 146423.79,
-        bse: 6716.95
-      });
+      const lastHist = history[history.length - 1];
+      if (lastHist) {
+        sampled.push({
+          year: String(lastHist.date || "2026").slice(0, 4),
+          combined: Number((lastHist.combined / 100).toFixed(2)),
+          nse: Number((lastHist.nse / 100).toFixed(2)),
+          bse: Number((lastHist.bse / 100).toFixed(2))
+        });
+      }
       return sampled;
     }
     return DEFAULT_TRAJECTORY;
@@ -466,8 +555,8 @@ export default function CyberpunkOverview({
         <div className="neoKpiCard">
           <div className="neoKpiHeader">
             <span className="neoKpiTitle">TOTAL MTF BOOK (NSE + BSE)</span>
-            <div className="neoKpiBadgeIcon green">
-              <TrendingUp size={13} />
+            <div className={`neoKpiBadgeIcon ${changeCombined >= 0 ? "green" : "red"}`}>
+              {changeCombined >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
             </div>
           </div>
           <div>
@@ -477,10 +566,10 @@ export default function CyberpunkOverview({
             </div>
             <div className="neoKpiDeltaRow">
               <div className="neoKpiDeltaGroup">
-                <span className="neoDeltaItem red">
-                  ↘ -₹180.03 Cr
+                <span className={`neoDeltaItem ${changeCombined >= 0 ? "green" : "red"}`}>
+                  {changeCombined >= 0 ? "↗ " : "↘ "}{totalDeltaCrStr}
                 </span>
-                <span className="neoDeltaPct red">({totalDeltaPctStr})</span>
+                <span className={`neoDeltaPct ${changeCombined >= 0 ? "green" : "red"}`}>({totalDeltaPctStr})</span>
               </div>
               <div className="neoKpiSubLabel">
                 <div>1D</div>
@@ -491,21 +580,21 @@ export default function CyberpunkOverview({
           <div className="neoKpiSparkWrap">
             <svg viewBox="0 0 200 32" preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
               <defs>
-                <linearGradient id="redSparkGrad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ff3b57" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#ff3b57" stopOpacity="0.0" />
+                <linearGradient id="totalSparkGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={changeCombined >= 0 ? "#00f090" : "#ff3b57"} stopOpacity="0.25" />
+                  <stop offset="100%" stopColor={changeCombined >= 0 ? "#00f090" : "#ff3b57"} stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path
-                d="M 0,10 Q 50,8 100,22 T 200,14"
+                d={changeCombined >= 0 ? "M 0,26 Q 70,22 130,12 T 200,6" : "M 0,10 Q 50,8 100,22 T 200,14"}
                 fill="none"
-                stroke="#ff3b57"
+                stroke={changeCombined >= 0 ? "#00f090" : "#ff3b57"}
                 strokeWidth="2.2"
                 strokeLinecap="round"
               />
               <path
-                d="M 0,10 Q 50,8 100,22 T 200,14 L 200,32 L 0,32 Z"
-                fill="url(#redSparkGrad1)"
+                d={changeCombined >= 0 ? "M 0,26 Q 70,22 130,12 T 200,6 L 200,32 L 0,32 Z" : "M 0,10 Q 50,8 100,22 T 200,14 L 200,32 L 0,32 Z"}
+                fill="url(#totalSparkGrad)"
               />
             </svg>
           </div>
@@ -524,10 +613,10 @@ export default function CyberpunkOverview({
             </div>
             <div className="neoKpiDeltaRow">
               <div className="neoKpiDeltaGroup">
-                <span className="neoDeltaItem red">
-                  ↘ -₹180.54 Cr
+                <span className={`neoDeltaItem ${changeNse >= 0 ? "green" : "red"}`}>
+                  {changeNse >= 0 ? "↗ " : "↘ "}{nseDeltaCrStr}
                 </span>
-                <span className="neoDeltaPct red">({nseDeltaPctStr})</span>
+                <span className={`neoDeltaPct ${changeNse >= 0 ? "green" : "red"}`}>({nseDeltaPctStr})</span>
               </div>
               <div className="neoKpiSubLabel">
                 <div>Share:</div>
@@ -538,21 +627,21 @@ export default function CyberpunkOverview({
           <div className="neoKpiSparkWrap">
             <svg viewBox="0 0 200 32" preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
               <defs>
-                <linearGradient id="redSparkGrad2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ff3b57" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#ff3b57" stopOpacity="0.0" />
+                <linearGradient id="nseSparkGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={changeNse >= 0 ? "#00f090" : "#ff3b57"} stopOpacity="0.25" />
+                  <stop offset="100%" stopColor={changeNse >= 0 ? "#00f090" : "#ff3b57"} stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path
-                d="M 0,8 Q 60,6 120,24 T 200,18"
+                d={changeNse >= 0 ? "M 0,26 Q 70,22 130,12 T 200,6" : "M 0,8 Q 60,6 120,24 T 200,18"}
                 fill="none"
-                stroke="#ff3b57"
+                stroke={changeNse >= 0 ? "#00f090" : "#ff3b57"}
                 strokeWidth="2.2"
                 strokeLinecap="round"
               />
               <path
-                d="M 0,8 Q 60,6 120,24 T 200,18 L 200,32 L 0,32 Z"
-                fill="url(#redSparkGrad2)"
+                d={changeNse >= 0 ? "M 0,26 Q 70,22 130,12 T 200,6 L 200,32 L 0,32 Z" : "M 0,8 Q 60,6 120,24 T 200,18 L 200,32 L 0,32 Z"}
+                fill="url(#nseSparkGrad)"
               />
             </svg>
           </div>
@@ -571,10 +660,10 @@ export default function CyberpunkOverview({
             </div>
             <div className="neoKpiDeltaRow">
               <div className="neoKpiDeltaGroup">
-                <span className="neoDeltaItem green">
-                  ↗ +₹0.52 Cr
+                <span className={`neoDeltaItem ${changeBse >= 0 ? "green" : "red"}`}>
+                  {changeBse >= 0 ? "↗ " : "↘ "}{bseDeltaCrStr}
                 </span>
-                <span className="neoDeltaPct green">({bseDeltaPctStr})</span>
+                <span className={`neoDeltaPct ${changeBse >= 0 ? "green" : "red"}`}>({bseDeltaPctStr})</span>
               </div>
               <div className="neoKpiSubLabel">
                 <div>Share:</div>
@@ -585,21 +674,21 @@ export default function CyberpunkOverview({
           <div className="neoKpiSparkWrap">
             <svg viewBox="0 0 200 32" preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
               <defs>
-                <linearGradient id="greenSparkGrad3" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#00f090" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#00f090" stopOpacity="0.0" />
+                <linearGradient id="bseSparkGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={changeBse >= 0 ? "#00f090" : "#ff3b57"} stopOpacity="0.25" />
+                  <stop offset="100%" stopColor={changeBse >= 0 ? "#00f090" : "#ff3b57"} stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path
-                d="M 0,26 Q 70,22 130,12 T 200,6"
+                d={changeBse >= 0 ? "M 0,26 Q 70,22 130,12 T 200,6" : "M 0,10 Q 50,8 100,22 T 200,14"}
                 fill="none"
-                stroke="#00f090"
+                stroke={changeBse >= 0 ? "#00f090" : "#ff3b57"}
                 strokeWidth="2.2"
                 strokeLinecap="round"
               />
               <path
-                d="M 0,26 Q 70,22 130,12 T 200,6 L 200,32 L 0,32 Z"
-                fill="url(#greenSparkGrad3)"
+                d={changeBse >= 0 ? "M 0,26 Q 70,22 130,12 T 200,6 L 200,32 L 0,32 Z" : "M 0,10 Q 50,8 100,22 T 200,14 L 200,32 L 0,32 Z"}
+                fill="url(#bseSparkGrad)"
               />
             </svg>
           </div>
@@ -615,17 +704,17 @@ export default function CyberpunkOverview({
           </div>
           <div>
             <div className="neoKpiValue" style={{ fontSize: "26px", marginTop: "8px" }}>
-              4,028
+              {totalSecuritiesCount.toLocaleString("en-IN")}
             </div>
             <div className="neoSecuritiesSplit">
               <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
                 <i className="neoDot blue" />
-                <span>2,172 NSE</span>
+                <span>{activeNseSec.toLocaleString("en-IN")} NSE</span>
               </span>
               <span style={{ color: "#475569" }}>•</span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
                 <i className="neoDot amber" />
-                <span>1,856 BSE</span>
+                <span>{activeBseSec.toLocaleString("en-IN")} BSE</span>
               </span>
             </div>
           </div>
@@ -781,7 +870,7 @@ export default function CyberpunkOverview({
 
             <div className="neoAllTimeHigh">
               <span>All-time MTF High:</span>
-              <b>₹1,53,320.77 Cr</b>
+              <b>₹{maxHistorical.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr</b>
             </div>
           </div>
         </div>
@@ -791,23 +880,27 @@ export default function CyberpunkOverview({
           <div className="neoStatCard">
             <div className="neoStatHeader">
               <span className="neoStatTitle">LATEST 1D NET FLOW</span>
-              <div className="neoStatIconBtn red">
-                <ArrowRight size={14} />
+              <div className={`neoStatIconBtn ${latestNetFlow >= 0 ? "green" : "red"}`}>
+                <ArrowRight size={14} style={{ transform: latestNetFlow >= 0 ? "rotate(-45deg)" : "rotate(45deg)" }} />
               </div>
             </div>
-            <div className="neoStatValue red">-₹173.09 Cr</div>
-            <div className="neoStatSub">Disclosed 04 Sept 2026</div>
+            <div className={`neoStatValue ${latestNetFlow >= 0 ? "green" : "red"}`}>
+              {formatSignedCr(latestNetFlow)}
+            </div>
+            <div className="neoStatSub">Disclosed {latestFlowDate}</div>
           </div>
 
           <div className="neoStatCard">
             <div className="neoStatHeader">
               <span className="neoStatTitle">MTF EXPOSURE (1D)</span>
-              <div className="neoStatIconBtn green">
+              <div className={`neoStatIconBtn ${pctCombined >= 0 ? "green" : "red"}`}>
                 <Activity size={14} />
               </div>
             </div>
-            <div className="neoStatValue red">-0.12%</div>
-            <div className="neoStatSub">vs 03 Sept 2026 session</div>
+            <div className={`neoStatValue ${pctCombined >= 0 ? "green" : "red"}`}>
+              {fmtPct(pctCombined)}
+            </div>
+            <div className="neoStatSub">vs {prevSessionDate} session</div>
           </div>
 
           <div className="neoStatCard">
@@ -817,8 +910,8 @@ export default function CyberpunkOverview({
                 <CalendarDays size={14} />
               </div>
             </div>
-            <div className="neoStatValue white">0</div>
-            <div className="neoStatSub">Last triggered: 06 May 2026</div>
+            <div className="neoStatValue white">{flushCount30D}</div>
+            <div className="neoStatSub">{lastFlush ? "Last triggered: " + fmtDate(lastFlush.date) : "No flush events detected"}</div>
           </div>
 
           <div className="neoStatCard">
@@ -828,7 +921,7 @@ export default function CyberpunkOverview({
                 <Target size={14} />
               </div>
             </div>
-            <div className="neoStatValue white">0.67%</div>
+            <div className="neoStatValue white">{avgLeverage.toFixed(2)}%</div>
             <div className="neoStatSub">Across active stocks book</div>
           </div>
         </div>
