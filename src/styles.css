@@ -9577,4 +9577,441 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   }
 }
 
+/* ==========================================================================
+   Cohesive Full Light Theme System for Neo-Terminal Cockpit
+   ========================================================================== */
+html[data-theme="light"] .neoTerminalApp,
+.neoTerminalApp.light {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Sidebar Navigation in Light Theme */
+html[data-theme="light"] .neoNavContainer,
+.neoTerminalApp.light .neoNavContainer {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoNavItem,
+.neoTerminalApp.light .neoNavItem {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoNavItem:hover,
+.neoTerminalApp.light .neoNavItem:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoNavItem.active,
+.neoTerminalApp.light .neoNavItem.active {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .neoInsightCard,
+.neoTerminalApp.light .neoInsightCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoInsightTitle,
+.neoTerminalApp.light .neoInsightTitle {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoInsightSub,
+.neoTerminalApp.light .neoInsightSub {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoInsightDetail,
+.neoTerminalApp.light .neoInsightDetail {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoInsightFooter,
+.neoTerminalApp.light .neoInsightFooter {
+  border-top-color: #e2e8f0;
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoTelemetryCard,
+.neoTerminalApp.light .neoTelemetryCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoTelemetryLabel,
+.neoTerminalApp.light .neoTelemetryLabel {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoTelemetryVal,
+.neoTerminalApp.light .neoTelemetryVal {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoTelemetryVal.syncWhite,
+.neoTerminalApp.light .neoTelemetryVal.syncWhite {
+  color: #0f172a;
+}
+
+/* 4 Top KPI Cards in Light Theme */
+html[data-theme="light"] .neoKpiCard,
+.neoTerminalApp.light .neoKpiCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoKpiTitle,
+.neoTerminalApp.light .neoKpiTitle {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoKpiValue,
+.neoTerminalApp.light .neoKpiValue {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoKpiUnit,
+.neoTerminalApp.light .neoKpiUnit {
+  color: #94a3b8;
+}
+
+html[data-theme="light"] .neoKpiSubLabel,
+.neoTerminalApp.light .neoKpiSubLabel {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoPillNse,
+.neoTerminalApp.light .neoPillNse {
+  background: #e0f2fe;
+  border-color: #bae6fd;
+  color: #0284c7;
+}
+
+html[data-theme="light"] .neoPillBse,
+.neoTerminalApp.light .neoPillBse {
+  background: #fef3c7;
+  border-color: #fde68a;
+  color: #d97706;
+}
+
+html[data-theme="light"] .neoSecuritiesSplit,
+.neoTerminalApp.light .neoSecuritiesSplit {
+  color: #64748b;
+}
+
+/* Long Term Trajectory Chart in Light Theme */
+html[data-theme="light"] .neoMainChartCard,
+.neoTerminalApp.light .neoMainChartCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoChartTitle,
+.neoTerminalApp.light .neoChartTitle {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoChartSubtitle,
+.neoTerminalApp.light .neoChartSubtitle {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoPillGroup,
+.neoTerminalApp.light .neoPillGroup {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .neoFilterBtn,
+.neoTerminalApp.light .neoFilterBtn {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoFilterBtn:hover,
+.neoTerminalApp.light .neoFilterBtn:hover {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoFilterBtn.active,
+.neoTerminalApp.light .neoFilterBtn.active {
+  background: #00d084;
+  color: #ffffff;
+  box-shadow: 0 1px 6px rgba(0, 208, 132, 0.3);
+}
+
+html[data-theme="light"] .neoExchangeBtn.active,
+.neoTerminalApp.light .neoExchangeBtn.active {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoChartFooter,
+.neoTerminalApp.light .neoChartFooter {
+  border-top-color: #e2e8f0;
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoCarouselPill,
+.neoTerminalApp.light .neoCarouselPill {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoCarouselPill:hover,
+.neoTerminalApp.light .neoCarouselPill:hover {
+  border-color: #00d084;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoAllTimeHigh,
+.neoTerminalApp.light .neoAllTimeHigh {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoAllTimeHigh b,
+.neoTerminalApp.light .neoAllTimeHigh b {
+  color: #059669;
+}
+
+/* Right Telemetry Column in Light Theme */
+html[data-theme="light"] .neoStatCard,
+.neoTerminalApp.light .neoStatCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoStatTitle,
+.neoTerminalApp.light .neoStatTitle {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoStatValue.white,
+.neoTerminalApp.light .neoStatValue.white {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoStatSub,
+.neoTerminalApp.light .neoStatSub {
+  color: #94a3b8;
+}
+
+/* Daily Leverage Flow in Light Theme */
+html[data-theme="light"] .neoFlowCard,
+.neoTerminalApp.light .neoFlowCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoFlowMetaRow,
+.neoTerminalApp.light .neoFlowMetaRow {
+  border-bottom-color: #e2e8f0;
+}
+
+html[data-theme="light"] .neoFlowPill,
+.neoTerminalApp.light .neoFlowPill {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoFlowPill b,
+.neoTerminalApp.light .neoFlowPill b {
+  color: #0f172a;
+}
+
+/* Heatmap in Light Theme */
+html[data-theme="light"] .neoHeatmapCard,
+.neoTerminalApp.light .neoHeatmapCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoHeatmapDateBadge,
+.neoTerminalApp.light .neoHeatmapDateBadge {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoHeatmapMonthLbl,
+html[data-theme="light"] .neoHeatmapDaysCol,
+.neoTerminalApp.light .neoHeatmapMonthLbl,
+.neoTerminalApp.light .neoHeatmapDaysCol {
+  color: #94a3b8;
+}
+
+/* Top Funded Securities Table in Light Theme */
+html[data-theme="light"] .neoTableCard,
+.neoTerminalApp.light .neoTableCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoSearchWrap,
+.neoTerminalApp.light .neoSearchWrap {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .neoSearchWrap input,
+.neoTerminalApp.light .neoSearchWrap input {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoSearchWrap svg,
+.neoTerminalApp.light .neoSearchWrap svg {
+  color: #94a3b8;
+}
+
+html[data-theme="light"] .neoSelect,
+.neoTerminalApp.light .neoSelect {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoTableActionBtn,
+.neoTerminalApp.light .neoTableActionBtn {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0284c7;
+}
+
+html[data-theme="light"] .neoTableActionBtn:hover,
+.neoTerminalApp.light .neoTableActionBtn:hover {
+  background: #e0f2fe;
+}
+
+html[data-theme="light"] .neoTable th,
+.neoTerminalApp.light .neoTable th {
+  background: #f8fafc;
+  color: #64748b;
+  border-bottom-color: #e2e8f0;
+}
+
+html[data-theme="light"] .neoTable th:hover,
+.neoTerminalApp.light .neoTable th:hover {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoTable td,
+.neoTerminalApp.light .neoTable td {
+  border-bottom-color: #f1f5f9;
+  color: #334155;
+}
+
+html[data-theme="light"] .neoTable tr:hover td,
+.neoTerminalApp.light .neoTable tr:hover td {
+  background: #f8fafc;
+}
+
+html[data-theme="light"] .neoSymCell,
+.neoTerminalApp.light .neoSymCell {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoCompCell,
+.neoTerminalApp.light .neoCompCell {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoNumCell,
+.neoTerminalApp.light .neoNumCell {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoPagination,
+.neoTerminalApp.light .neoPagination {
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+}
+
+html[data-theme="light"] .neoPageBtns button,
+.neoTerminalApp.light .neoPageBtns button {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoPageBtns button:hover:not(:disabled),
+.neoTerminalApp.light .neoPageBtns button:hover:not(:disabled) {
+  border-color: #00d084;
+  color: #0f172a;
+}
+
+/* Donut Composition Card in Light Theme */
+html[data-theme="light"] .neoCompCard,
+.neoTerminalApp.light .neoCompCard {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoDonutCenter b,
+.neoTerminalApp.light .neoDonutCenter b {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoDonutCenter span,
+.neoTerminalApp.light .neoDonutCenter span {
+  color: #64748b;
+}
+
+html[data-theme="light"] .neoCompItem,
+.neoTerminalApp.light .neoCompItem {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .neoCompItem:hover,
+html[data-theme="light"] .neoCompItem.hovered,
+.neoTerminalApp.light .neoCompItem:hover,
+.neoTerminalApp.light .neoCompItem.hovered {
+  border-color: #00d084;
+  background: #f0fdf4;
+}
+
+html[data-theme="light"] .neoCompName,
+.neoTerminalApp.light .neoCompName {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .neoCompDesc,
+.neoTerminalApp.light .neoCompDesc {
+  color: #64748b;
+}
+
+/* Floating Action Button in Light Theme */
+html[data-theme="light"] .neoFloatingBtn,
+.neoTerminalApp.light .neoFloatingBtn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="light"] .neoFloatingBtn:hover,
+.neoTerminalApp.light .neoFloatingBtn:hover {
+  background: #f8fafc;
+  border-color: #00d084;
+  color: #00a86b;
+}
+
+
 

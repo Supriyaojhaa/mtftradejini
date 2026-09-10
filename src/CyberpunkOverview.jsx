@@ -98,7 +98,7 @@ function Spark({ positive }) {
   );
 }
 
-function CustomFlowTooltip({ active, payload }) {
+function CustomFlowTooltip({ active, payload, dark = true }) {
   if (!active || !payload || !payload.length) return null;
   const d = payload[0]?.payload;
   if (!d) return null;
@@ -107,22 +107,51 @@ function CustomFlowTooltip({ active, payload }) {
   const net = d.net !== undefined ? d.net : (fresh - liq);
   const isPositive = net >= 0;
   return (
-    <div className="flowTooltipBox" style={{ background: "#0c131f", border: "1px solid #1e2c42", borderRadius: "8px", padding: "10px 12px", color: "#f8fafc", fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", borderBottom: "1px solid #1c2940", paddingBottom: "4px" }}>
-        <span style={{ color: "#94a3b8" }}>{fmtDate(d.date)}</span>
+    <div
+      className="flowTooltipBox"
+      style={{
+        background: dark ? "#0c131f" : "#ffffff",
+        border: `1px solid ${dark ? "#1e2c42" : "#e2e8f0"}`,
+        borderRadius: "8px",
+        padding: "10px 12px",
+        color: dark ? "#f8fafc" : "#0f172a",
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: "11px",
+        boxShadow: dark ? "0 8px 24px rgba(0,0,0,0.5)" : "0 8px 24px rgba(0,0,0,0.08)"
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "6px",
+          borderBottom: `1px solid ${dark ? "#1c2940" : "#e2e8f0"}`,
+          paddingBottom: "4px"
+        }}
+      >
+        <span style={{ color: dark ? "#94a3b8" : "#64748b" }}>{fmtDate(d.date)}</span>
         {d.flush && <span style={{ color: "#f59e0b", fontWeight: 700 }}>⚡ FLUSH EVENT</span>}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
-          <span style={{ color: "#8b9cb4" }}>Fresh Borrowing:</span>
+          <span style={{ color: dark ? "#8b9cb4" : "#64748b" }}>Fresh Borrowing:</span>
           <b style={{ color: "#00f090" }}>+{formatExactCr(fresh)}</b>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
-          <span style={{ color: "#8b9cb4" }}>Liquidated Margin:</span>
+          <span style={{ color: dark ? "#8b9cb4" : "#64748b" }}>Liquidated Margin:</span>
           <b style={{ color: "#ff3b57" }}>-{formatExactCr(liq)}</b>
         </div>
-        <div style={{ borderTop: "1px solid #1c2940", paddingTop: "4px", display: "flex", justifyContent: "space-between", gap: "12px", marginTop: "2px" }}>
-          <span style={{ color: "#cbd5e1", fontWeight: 600 }}>Net Daily Shift:</span>
+        <div
+          style={{
+            borderTop: `1px solid ${dark ? "#1c2940" : "#e2e8f0"}`,
+            paddingTop: "4px",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "12px",
+            marginTop: "2px"
+          }}
+        >
+          <span style={{ color: dark ? "#cbd5e1" : "#0f172a", fontWeight: 600 }}>Net Daily Shift:</span>
           <b style={{ color: isPositive ? "#00f090" : "#ff3b57" }}>{formatSignedCr(net)}</b>
         </div>
       </div>
@@ -141,7 +170,8 @@ export default function CyberpunkOverview({
   nseSecCount = 2172,
   bseSecCount = 1856,
   onRefresh,
-  onNavigate
+  onNavigate,
+  dark = true
 }) {
   const [period, setPeriod] = useState("ALL");
   const [exchange, setExchange] = useState("ALL");
@@ -663,19 +693,19 @@ export default function CyberpunkOverview({
                   </linearGradient>
                 </defs>
                 <CartesianGrid
-                  stroke="#162030"
+                  stroke={dark ? "#162030" : "#e2e8f0"}
                   strokeDasharray="2 2"
                   vertical={false}
                 />
                 <XAxis
                   dataKey="year"
-                  tick={{ fill: "#56657a", fontSize: 11 }}
+                  tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
                   dy={6}
                 />
                 <YAxis
-                  tick={{ fill: "#56657a", fontSize: 11 }}
+                  tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
                   domain={[0, 160000]}
@@ -685,11 +715,12 @@ export default function CyberpunkOverview({
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "rgba(10, 16, 26, 0.95)",
+                    background: dark ? "rgba(10, 16, 26, 0.95)" : "rgba(255, 255, 255, 0.98)",
                     backdropFilter: "blur(8px)",
-                    border: "1px solid #1e2e46",
+                    border: `1px solid ${dark ? "#1e2e46" : "#e2e8f0"}`,
                     borderRadius: 8,
-                    color: "#f8fafc",
+                    color: dark ? "#f8fafc" : "#0f172a",
+                    boxShadow: dark ? "0 10px 25px rgba(0,0,0,0.5)" : "0 8px 24px rgba(0,0,0,0.1)",
                     fontSize: 12,
                     fontFamily: "'IBM Plex Mono', monospace"
                   }}
@@ -912,7 +943,7 @@ export default function CyberpunkOverview({
                   <stop offset="100%" stopColor="#ff3b57" stopOpacity={0.95} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#162030" strokeDasharray="2 2" vertical={false} />
+              <CartesianGrid stroke={dark ? "#162030" : "#e2e8f0"} strokeDasharray="2 2" vertical={false} />
               <XAxis
                 dataKey="date"
                 tickFormatter={(x) => {
@@ -924,21 +955,21 @@ export default function CyberpunkOverview({
                   }
                   return String(x).slice(5);
                 }}
-                tick={{ fill: "#56657a", fontSize: 11 }}
+                tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
                 dy={6}
               />
               <YAxis
                 tickFormatter={formatFlowY}
-                tick={{ fill: "#56657a", fontSize: 11 }}
+                tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
                 width={70}
               />
-              <Tooltip cursor={{ fill: "rgba(255,255,255,0.03)" }} content={<CustomFlowTooltip />} />
+              <Tooltip cursor={{ fill: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)" }} content={<CustomFlowTooltip dark={dark} />} />
               {(flowType === "net" || flowType === "split") && (
-                <ReferenceLine y={0} stroke="rgba(255,255,255,0.18)" strokeWidth={1} />
+                <ReferenceLine y={0} stroke={dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)"} strokeWidth={1} />
               )}
               {flowType === "dual" ? (
                 <>
@@ -1044,15 +1075,15 @@ export default function CyberpunkOverview({
                 <div key={wIdx} className="neoHeatmapCol">
                   {week.map((day) => {
                     const isCurrent = activeDay.date === day.date;
-                    let cellBg = "#0e1522";
+                    let cellBg = dark ? "#0e1522" : "#e2e8f0";
                     if (day.isTrading) {
                       if (day.intensity === 3) cellBg = "#00f090";
                       else if (day.intensity === 2) cellBg = "#10b981";
-                      else if (day.intensity === 1) cellBg = "#047857";
-                      else if (day.intensity === -1) cellBg = "#991b1b";
+                      else if (day.intensity === 1) cellBg = dark ? "#047857" : "#34d399";
+                      else if (day.intensity === -1) cellBg = dark ? "#991b1b" : "#f87171";
                       else if (day.intensity === -2) cellBg = "#e11d48";
                       else if (day.intensity === -3) cellBg = "#ff3b57";
-                      else cellBg = "#182335";
+                      else cellBg = dark ? "#182335" : "#cbd5e1";
                     }
                     return (
                       <div
@@ -1060,7 +1091,7 @@ export default function CyberpunkOverview({
                         className={`neoHeatmapCell ${isCurrent ? "current" : ""}`}
                         style={{
                           backgroundColor: cellBg,
-                          boxShadow: isCurrent ? "0 0 0 1.5px #38bdf8" : "none"
+                          boxShadow: isCurrent ? `0 0 0 1.5px ${dark ? "#38bdf8" : "#0284c7"}` : "none"
                         }}
                         onMouseEnter={() => setHoveredDay(day)}
                         onClick={() => setSelectedDay(day)}
@@ -1208,7 +1239,7 @@ export default function CyberpunkOverview({
                   innerRadius={50}
                   outerRadius={72}
                   dataKey="value"
-                  stroke="#0d131f"
+                  stroke={dark ? "#0d131f" : "#ffffff"}
                   strokeWidth={2}
                   paddingAngle={3}
                 >
@@ -1228,9 +1259,11 @@ export default function CyberpunkOverview({
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    background: "rgba(10, 16, 26, 0.95)",
-                    border: "1px solid #1e2e46",
+                    background: dark ? "rgba(10, 16, 26, 0.95)" : "rgba(255, 255, 255, 0.98)",
+                    border: `1px solid ${dark ? "#1e2e46" : "#e2e8f0"}`,
                     borderRadius: 8,
+                    color: dark ? "#f8fafc" : "#0f172a",
+                    boxShadow: dark ? "0 8px 24px rgba(0,0,0,0.5)" : "0 8px 24px rgba(0,0,0,0.08)",
                     fontSize: 11,
                     fontFamily: "'IBM Plex Mono', monospace"
                   }}

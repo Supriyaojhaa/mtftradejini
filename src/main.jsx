@@ -508,19 +508,19 @@ function DailyActivityHeatmap({ flow = [] }) {
 
 function App(){
 
- const [dark, setDark] = useState(() => {
-   if (typeof window !== "undefined") {
-     try {
-       const saved = localStorage.getItem("mtf_theme") || localStorage.getItem("theme");
-       if (saved === "dark") return true;
-       if (saved === "light") return false;
-     } catch (e) {}
-     const attr = document.documentElement.getAttribute("data-theme") || document.documentElement.dataset.theme;
-     if (attr === "dark") return true;
-     if (attr === "light") return false;
-   }
-   return false;
- });
+  const [dark, setDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("mtf_theme") || localStorage.getItem("theme");
+        if (saved === "light") return false;
+        if (saved === "dark") return true;
+      } catch (e) {}
+      const attr = document.documentElement.getAttribute("data-theme") || document.documentElement.dataset.theme;
+      if (attr === "light") return false;
+      if (attr === "dark") return true;
+    }
+    return true;
+  });
 
  const toggleTheme = () => {
    setDark(prev => {
@@ -968,6 +968,7 @@ function App(){
             bseSecCount={bseSecCount}
             onRefresh={fetchDashboardData}
             onNavigate={setTab}
+            dark={dark}
           />
         )}
       </div>
