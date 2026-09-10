@@ -1,11 +1,9 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {createRoot} from "react-dom/client";
 import {AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, ReferenceLine} from "recharts";
-import {Home, Search, PanelLeftClose, PanelLeftOpen, PieChart as PieIcon, Calculator, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight, Menu, X, LayoutGrid} from "lucide-react";
+import {Home, Search, PanelLeftClose, PanelLeftOpen, PieChart as PieIcon, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight, Menu, X, LayoutGrid} from "lucide-react";
 import ScreenerView from "./ScreenerView.jsx";
 import SectorsView from "./SectorsView.jsx";
-import CalculatorView from "./CalculatorView.jsx";
-import AboutMethodologyView from "./AboutMethodologyView.jsx";
 import CyberpunkOverview from "./CyberpunkOverview.jsx";
 import "./styles.css";
 
@@ -864,22 +862,6 @@ function App(){
               <PieIcon size={16} color={tab === "sectors" ? "#00f090" : "#64748b"} />
               <span>Sectors & Heatmap</span>
             </button>
-
-            <button
-              className={`neoNavItem ${tab === "calc" ? "active" : ""}`}
-              onClick={() => setTab("calc")}
-            >
-              <Calculator size={16} color={tab === "calc" ? "#00f090" : "#64748b"} />
-              <span>Calculators & Margin</span>
-            </button>
-
-            <button
-              className={`neoNavItem ${tab === "about" || tab === "methodology" ? "active" : ""}`}
-              onClick={() => setTab("about")}
-            >
-              <CircleHelp size={16} color={tab === "about" || tab === "methodology" ? "#00f090" : "#64748b"} />
-              <span>About & Methodology</span>
-            </button>
           </div>
 
           {/* MTF INSIGHT Card */}
@@ -946,14 +928,6 @@ function App(){
         ) : tab === "sectors" ? (
           <main className="neoMainCol">
             <SectorsView onBack={() => setTab("screener")} />
-          </main>
-        ) : tab === "calc" ? (
-          <main className="neoMainCol">
-            <CalculatorView onBack={() => setTab("screener")} />
-          </main>
-        ) : tab === "about" || tab === "methodology" ? (
-          <main className="neoMainCol">
-            <AboutMethodologyView initialTab={tab} onNavigate={setTab} />
           </main>
         ) : (
           <CyberpunkOverview
