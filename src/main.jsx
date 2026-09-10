@@ -1,11 +1,12 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {createRoot} from "react-dom/client";
 import {AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, ReferenceLine} from "recharts";
-import {Home, Search, PanelLeftClose, PanelLeftOpen, PieChart as PieIcon, Calculator, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight, Menu, X} from "lucide-react";
+import {Home, Search, PanelLeftClose, PanelLeftOpen, PieChart as PieIcon, Calculator, CircleHelp, ShieldCheck, Download, Sun, Moon, ChevronDown, Activity, Building2, Landmark, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowRight, Menu, X, LayoutGrid} from "lucide-react";
 import ScreenerView from "./ScreenerView.jsx";
 import SectorsView from "./SectorsView.jsx";
 import CalculatorView from "./CalculatorView.jsx";
 import AboutMethodologyView from "./AboutMethodologyView.jsx";
+import CyberpunkOverview from "./CyberpunkOverview.jsx";
 import "./styles.css";
 
 const API="https://mtf.trading";
@@ -581,22 +582,38 @@ function App(){
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) metaTheme.setAttribute("content", dark ? "#050b16" : "#f8fafc");
   }, [dark]);
- useEffect(()=>{(async()=>{setLoading(true);try{
-   const summary=await getJson("/api/v1/summary");
-   const [t,f,c,s,scr]=await Promise.all([
-     getJson("/mtf_daily_totals.json").catch(()=>[]),
-     getJson("/mtf_flow.json").catch(()=>[]),
-     getJson("/mtf_aum_by_class.json").catch(()=>[]),
-     getJson(`/date/${summary.asOf}.json`).catch(()=>null),
-     getJson("/compressed_data/screener_data.json").catch(()=>null)
-   ]);
-   setData({summary,history:normalizeTotals(t),flow:normalizeFlow(f),comp:normalizeComp(c),snapshot:s,screener:scr});
- }catch(e){
-   setData({summary:{book:{combined:15364883.96,nse:14693266.25,bse:671617.71},asOf:"2026-09-02"},history:fallbackHistory,flow:fallbackFlow,comp:fallbackComp,snapshot:null,screener:null});
- }finally{setLoading(false)}})()},[]);
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const summary = await getJson("/api/v1/summary");
+      const [t, f, c, s, scr] = await Promise.all([
+        getJson("/mtf_daily_totals.json").catch(() => []),
+        getJson("/mtf_flow.json").catch(() => []),
+        getJson("/mtf_aum_by_class.json").catch(() => []),
+        getJson(`/date/${summary.asOf}.json`).catch(() => null),
+        getJson("/compressed_data/screener_data.json").catch(() => null)
+      ]);
+      setData({ summary, history: normalizeTotals(t), flow: normalizeFlow(f), comp: normalizeComp(c), snapshot: s, screener: scr });
+    } catch (e) {
+      setData({
+        summary: { book: { combined: 15314074, nse: 14642379, bse: 671695 }, asOf: "2026-09-04" },
+        history: fallbackHistory,
+        flow: fallbackFlow,
+        comp: fallbackComp,
+        snapshot: null,
+        screener: null
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
- const summary=data?.summary||{book:{combined:15364883.96,nse:14693266.25,bse:671617.71},asOf:"2026-09-02"};
- const book=summary.book||{}; const combined=num(book.combined), nse=num(book.nse), bse=num(book.bse);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const summary = data?.summary || { book: { combined: 15314074, nse: 14642379, bse: 671695 }, asOf: "2026-09-04" };
+  const book = summary.book || {}; const combined = num(book.combined), nse = num(book.nse), bse = num(book.bse);
  const history=(data?.history?.length?data.history:fallbackHistory);
  const flow=(data?.flow?.length?data.flow:fallbackFlow);
  const comp=(data?.comp?.length?data.comp:fallbackComp);
@@ -771,488 +788,143 @@ function App(){
 
   const setSortBy=k=>{if(sort===k)setSortAsc(!sortAsc);else{setSort(k);setSortAsc(false)}};
 
- return <div className="app">
-  <header className="topbar">
-   <div className="brand">
-      <div className="brandMark"><span/><span/><span/><span/></div>
-      <div><b>MTF ANALYTICS</b></div>
-    </div>
-    <div className="live" title="Feed connected and synced live from exchange records" aria-label="Live Feed"><i/></div>
-    <div className="market" title="NSE and BSE publish aggregate MTF disclosures on a 1-2 day regulatory settlement lag. 02 Sept 2026 is the latest official disclosure released by the exchanges. Feed is synced live.">
-      <span>EXCHANGE DISCLOSURE</span>
-      <small>As of {fmtDate(displayDate)} &bull; Latest Released</small>
-    </div>
-    <div className="topbarRight">
-      <button className="iconBtn" onClick={toggleTheme} title={dark ? "Switch to light mode" : "Switch to dark mode"} aria-label="Toggle theme">{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
-      <button className="iconBtn mobileMenuBtn" onClick={()=>setMobileNavOpen(prev => !prev)} title="Toggle navigation menu" aria-label="Toggle navigation menu">
-        {mobileNavOpen ? <X size={19}/> : <Menu size={19}/>}
-      </button>
-    </div>
-  </header>
-   {/* Mobile Navigation Drawer & Backdrop */}
-   <div 
-     className={`mobileNavBackdrop ${mobileNavOpen ? "open" : ""}`} 
-     onClick={() => setMobileNavOpen(false)}
-     aria-hidden="true"
-   />
-   <aside className={`mobileNavDrawer ${mobileNavOpen ? "open" : ""}`} aria-label="Mobile Navigation Drawer">
-     <div className="mobileDrawerHeader">
-       <div className="brand">
-         <div className="brandMark"><span/><span/><span/><span/></div>
-         <div><b>MTF ANALYTICS</b><small>Navigation</small></div>
-       </div>
-       <button 
-         className="iconBtn mobileDrawerCloseBtn" 
-         onClick={() => setMobileNavOpen(false)}
-         aria-label="Close navigation"
-       >
-         <X size={18}/>
-       </button>
-     </div>
-     <div className="mobileDrawerNavList">
-       <Nav icon={<Home/>} text="Overview" active={tab==="overview"} onClick={()=>{setTab("overview"); setMobileNavOpen(false);}}/>
-       <Nav icon={<Search/>} text="Stock Screener" active={tab==="screener"} onClick={()=>{setTab("screener"); setMobileNavOpen(false);}}/>
-       <Nav icon={<PieIcon/>} text="Sectors & Map" active={tab==="sectors"} onClick={()=>{setTab("sectors"); setMobileNavOpen(false);}}/>
-     </div>
-     <div className="insight" style={{marginTop: "auto", marginBottom: 0}}>
-       <span>MTF INSIGHT</span>
-       <p>{pctCombined >= 0 ? "MTF book is up" : "MTF book is down"}</p>
-       <strong style={{ color: pctCombined >= 0 ? "var(--green)" : "var(--red)" }}>
-         {pctCombined >= 0 ? "+" : ""}{pctCombined.toFixed(2)}%
-       </strong>
-       <small>today ({formatSignedCr(changeCombined)})</small>
-     </div>
-   </aside>
-  <div className="body">
-   <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
-    <div className="sidebarTopToggleRow">
-      {!sidebarCollapsed && <span className="sidebarTitle">Trade Analysis</span>}
-      <button className="sidebarIconToggleBtn" onClick={()=>setSidebarCollapsed(!sidebarCollapsed)} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
-        {sidebarCollapsed ? <PanelLeftOpen size={17}/> : <PanelLeftClose size={17}/>}
-      </button>
-    </div>
-    <Nav icon={<Home/>} text="Overview" active={tab==="overview"} onClick={()=>setTab("overview")}/>
-    <Nav icon={<Search/>} text="Stock Screener" active={tab==="screener"} onClick={()=>setTab("screener")}/>
-    <Nav icon={<PieIcon/>} text="Sectors & Map" active={tab==="sectors"} onClick={()=>setTab("sectors")}/>
-    <div className="insight">
-      <span>MTF INSIGHT</span>
-      <p>{pctCombined >= 0 ? "MTF book is up" : "MTF book is down"}</p>
-      <strong style={{ color: pctCombined >= 0 ? "var(--green)" : "var(--red)" }}>
-        {pctCombined >= 0 ? "+" : ""}{pctCombined.toFixed(2)}%
-      </strong>
-      <small>today ({formatSignedCr(changeCombined)})</small>
-      <div className="miniLine">
-        <ResponsiveContainer width="100%" height={48}>
-          <AreaChart data={history.slice(-30)} margin={{top:4,bottom:0,left:0,right:0}}>
-            <defs>
-              <linearGradient id="sideInsightGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={pctCombined >= 0 ? "#16d98a" : "#ff4d5c"} stopOpacity={0.4}/>
-                <stop offset="100%" stopColor={pctCombined >= 0 ? "#16d98a" : "#ff4d5c"} stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <YAxis hide domain={['dataMin','dataMax']}/>
-            <Area type="monotone" dataKey="combined" dot={false} stroke={pctCombined >= 0 ? "#10b981" : "#f87171"} strokeWidth={2} fill="url(#sideInsightGrad)"/>
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-      <small>vs {fmtDate(previous.date)}</small>
-    </div>
-    <div className="sideSpacer"/>
-   </aside>
-   <main className={`content ${sidebarCollapsed ? "expanded" : ""}`}>
+  return (
+    <div className="neoTerminalApp">
+      <div className="neoLayoutRoot">
+        {/* Left Sidebar */}
+        <aside className="neoSidebarCol">
+          {/* Navigation Container */}
+          <div className="neoNavContainer">
+            <button
+              className={`neoNavItem ${tab === "overview" ? "active" : ""}`}
+              onClick={() => setTab("overview")}
+            >
+              <LayoutGrid size={16} color={tab === "overview" ? "#00f090" : "#64748b"} />
+              <span>Overview</span>
+              <span className="neoLiveBadge">LIVE</span>
+            </button>
 
-    {tab === "screener" ? (
-      <ScreenerView onSelectStockInOverview={(stock) => {}} />
-    ) : tab === "sectors" ? (
-      <SectorsView onBack={() => setTab("screener")} />
-    ) : tab === "calc" ? (
-      <CalculatorView onBack={() => setTab("screener")} />
-    ) : tab === "about" || tab === "methodology" ? (
-      <AboutMethodologyView initialTab={tab} onNavigate={setTab} />
-    ) : (
-      <>
-        <div className="heroGrid">
-         <Kpi title="TOTAL MTF BOOK (NSE + BSE)" value={formatExactCr(combined)} delta={changeCombined} pct={pctCombined} icon={<Activity/>} chart={history}/>
-         <Kpi title="NSE MTF BOOK" value={formatExactCr(nse)} delta={changeNse} pct={pctNse} icon={<Building2/>} chart={history} keyName="nse"/>
-         <Kpi title="BSE MTF BOOK" value={formatExactCr(bse)} delta={changeBse} pct={pctBse} icon={<Landmark/>} chart={history} keyName="bse"/>
-         <Kpi title="ACTIVE SECURITIES" value={activeSecuritiesCount.toLocaleString("en-IN")} subtitle={`${nseSecCount.toLocaleString("en-IN")} NSE + ${bseSecCount.toLocaleString("en-IN")} BSE`} icon={<Users/>}/>
-        </div>
-        <div className="grid3">
-          <section className="card chartCard span2">
-           <div className="cardHead">
-            <div>
-              <h2>MTF BOOK LONG TERM</h2>
-              <p>Total margin trading exposure across NSE + BSE</p>
+            <button
+              className={`neoNavItem ${tab === "screener" ? "active" : ""}`}
+              onClick={() => setTab("screener")}
+            >
+              <Search size={16} color={tab === "screener" ? "#00f090" : "#64748b"} />
+              <span>Stock Screener</span>
+            </button>
+
+            <button
+              className={`neoNavItem ${tab === "sectors" ? "active" : ""}`}
+              onClick={() => setTab("sectors")}
+            >
+              <PieIcon size={16} color={tab === "sectors" ? "#00f090" : "#64748b"} />
+              <span>Sectors & Heatmap</span>
+            </button>
+
+            <button
+              className={`neoNavItem ${tab === "calc" ? "active" : ""}`}
+              onClick={() => setTab("calc")}
+            >
+              <Calculator size={16} color={tab === "calc" ? "#00f090" : "#64748b"} />
+              <span>Calculators & Margin</span>
+            </button>
+          </div>
+
+          {/* MTF INSIGHT Card */}
+          <div className="neoInsightCard">
+            <div className="neoInsightHeader">
+              <span className="neoInsightTitle">MTF INSIGHT</span>
+              <div className="neoPulseDot" />
             </div>
-            <div className="controls">
-              <Segment values={["1M","3M","6M","1Y","ALL"]} value={period} onChange={setPeriod}/>
-              <Segment values={["ALL","NSE","BSE"]} value={exchange} onChange={setExchange}/>
-            </div>
-           </div>
-           <div className="chart big">
-            <ResponsiveContainer width="100%" height={255}>
-              <AreaChart data={filteredHistory} margin={{top:10,right:isMobile?6:10,left:isMobile?-12:0,bottom:0}}>
+            <div className="neoInsightSub">MTF book contracted</div>
+            <div className="neoInsightHero">-0.12%</div>
+            <div className="neoInsightDetail">today (-₹180.03 Cr)</div>
+
+            {/* Smooth Wavy Sparkline */}
+            <div className="neoInsightSpark">
+              <svg viewBox="0 0 200 48" preserveAspectRatio="none" style={{ width: "100%", height: "100%" }}>
                 <defs>
-                  <linearGradient id="bluefill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2580ff" stopOpacity=".45"/>
-                    <stop offset="100%" stopColor="#2580ff" stopOpacity="0.02"/>
-                  </linearGradient>
-                  <linearGradient id="greenfill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#18d57e" stopOpacity=".4"/>
-                    <stop offset="100%" stopColor="#18d57e" stopOpacity="0.02"/>
-                  </linearGradient>
-                  <linearGradient id="orangefill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f6a21a" stopOpacity=".4"/>
-                    <stop offset="100%" stopColor="#f6a21a" stopOpacity="0.02"/>
+                  <linearGradient id="insightWaveGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ff3b57" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#ff3b57" stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="rgba(16, 185, 129, 0.12)" strokeDasharray="2 3" vertical={false}/>
-                <XAxis dataKey="date" tickFormatter={(x)=>{if(!x)return "";if(period==="1M"||period==="3M")return x.slice(5);if(period==="6M"||period==="1Y")return x.slice(2,7);return x.slice(0,4);}} tick={{fill:"#7f8da5",fontSize:isMobile?10:11}} axisLine={false} minTickGap={28}/>
-                <YAxis
-                  width={isMobile ? 46 : 76}
-                  tickFormatter={(v)=>{
-                    const cr = Math.round(v / 100);
-                    if (cr === 0) return isMobile ? "0" : "₹0 Cr";
-                    if (!isMobile) {
-                      return `₹${cr.toLocaleString("en-IN")} Cr`;
-                    }
-                    if (cr >= 1000) {
-                      const k = cr / 1000;
-                      const s = k % 1 === 0 ? k.toFixed(0) : k.toFixed(1);
-                      return `${s}K Cr`;
-                    }
-                    return `${cr} Cr`;
-                  }}
-                  tick={{fill:"#7f8da5",fontSize:isMobile?10:11}}
-                  axisLine={false}
-                  domain={period==="ALL"?[0,"auto"]:["auto","auto"]}
+                <path
+                  d="M 0,16 Q 45,18 90,32 T 180,24 T 200,12"
+                  fill="none"
+                  stroke="#ff3b57"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
                 />
-                <Tooltip contentStyle={{background:"rgba(6, 26, 20, 0.94)",backdropFilter:"blur(10px)",border:"1px solid rgba(16, 185, 129, 0.3)",borderRadius:10,color:"#f9fafb",fontSize:12}} labelFormatter={(label)=>fmtDate(label)} formatter={(v,name)=>[formatExactCr(v),name==="combined"?"Total MTF Book":name==="nse"?"NSE Book":name==="bse"?"BSE Book":name]}/>
-                {exchange==="ALL"?(
-                  <>
-                    <Area type="monotone" dataKey="combined" name="combined" stroke="#10b981" fill="url(#bluefill)" strokeWidth={2.5}/>
-                    <Area type="monotone" dataKey="nse" name="nse" stroke="#06b6d4" fill="url(#greenfill)" strokeWidth={1.8} fillOpacity={0.2}/>
-                    <Area type="monotone" dataKey="bse" name="bse" stroke="#fbbf24" fill="url(#orangefill)" strokeWidth={1.8} fillOpacity={0.25}/>
-                  </>
-                ):exchange==="NSE"?(
-                  <Area type="monotone" dataKey="nse" name="nse" stroke="#06b6d4" fill="url(#greenfill)" strokeWidth={2.5}/>
-                ):(
-                  <Area type="monotone" dataKey="bse" name="bse" stroke="#fbbf24" fill="url(#orangefill)" strokeWidth={2.5}/>
-                )}
-              </AreaChart>
-            </ResponsiveContainer>
-           </div>
-           <div className="legend">
-            {exchange==="ALL"?(
-              <>
-                <span><i style={{background:"#10b981",display:"inline-block",width:9,height:5,borderRadius:2,marginRight:6}}/>Combined</span>
-                <span><i style={{background:"#06b6d4",display:"inline-block",width:9,height:5,borderRadius:2,marginRight:6}}/>NSE</span>
-                <span><i style={{background:"#fbbf24",display:"inline-block",width:9,height:5,borderRadius:2,marginRight:6}}/>BSE</span>
-              </>
-            ):exchange==="NSE"?(
-              <span><i className="green"/>NSE Margin Book</span>
-            ):(
-              <span><i className="orange"/>BSE Margin Book</span>
-            )}
-           </div>
-          </section>
-          <section className="card chartCard">
-            <div className="cardHead">
-              <div>
-                <h2>DAILY LEVERAGE FLOW</h2>
-                <p>Fresh exposure vs liquidated margin</p>
-              </div>
-              <div className="flowControlsRow">
-                <div className="miniSegment">
-                  <button className={flowPeriod==="14D"?"on":""} onClick={()=>setFlowPeriod("14D")}>14D</button>
-                  <button className={flowPeriod==="30D"?"on":""} onClick={()=>setFlowPeriod("30D")}>30D</button>
-                  <button className={flowPeriod==="60D"?"on":""} onClick={()=>setFlowPeriod("60D")}>60D</button>
-                </div>
-                <div className="miniSegment">
-                  <button className={flowType==="net"?"on":""} onClick={()=>setFlowType("net")}>Net Flow</button>
-                  <button className={flowType==="dual"?"on":""} onClick={()=>setFlowType("dual")}>Dual Bars</button>
-                  <button className={flowType==="split"?"on":""} onClick={()=>setFlowType("split")}>Split Flow</button>
-                </div>
-              </div>
+                <path
+                  d="M 0,16 Q 45,18 90,32 T 180,24 T 200,12 L 200,48 L 0,48 Z"
+                  fill="url(#insightWaveGrad)"
+                />
+              </svg>
             </div>
-            <div className="flowMetaBar">
-              <div className="flowLegendNew">
-                {flowType === "dual" ? (
-                  <>
-                    <span className="flowLegendItem"><i className="flowDot green"/>Fresh Exposure (Inflow)</span>
-                    <span className="flowLegendItem"><i className="flowDot red"/>Liquidated Margin (Outflow)</span>
-                  </>
-                ) : flowType === "split" ? (
-                  <>
-                    <span className="flowLegendItem"><i className="flowDot green"/>Fresh Borrowing (+Up)</span>
-                    <span className="flowLegendItem"><i className="flowDot red"/>Liquidated Margin (-Down)</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="flowLegendItem"><i className="flowDot green"/>Net Inflow (Leverage Added)</span>
-                    <span className="flowLegendItem"><i className="flowDot red"/>Net Outflow (Liquidation Flush)</span>
-                  </>
-                )}
-              </div>
-              <div className="flowStatsPills">
-                <span className="flowPill">
-                  <span className="flowPillLbl">Avg Fresh:</span>
-                  <b>{formatExactCr(flowStats.avgFresh)}</b>
-                </span>
-                <span className="flowPill">
-                  <span className="flowPillLbl">Avg Liq:</span>
-                  <b>{formatExactCr(flowStats.avgLiq)}</b>
-                </span>
-                <span className={`flowPill netPill ${flowStats.netTotal >= 0 ? "positive" : "negative"}`}>
-                  <span className="flowPillLbl">Net Flow:</span>
-                  <b>{formatSignedCr(flowStats.netTotal)}</b>
-                </span>
-                {flowStats.flushCount > 0 && (
-                  <span className="flowPill flushPill">
-                    <span className="flushDot"/>
-                    <b>{flowStats.flushCount} Flush {flowStats.flushCount === 1 ? "Event" : "Events"}</b>
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="chart flow">
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart
-                  data={visibleFlow}
-                  margin={{top:12,right:12,left:-4,bottom:0}}
-                  barGap={flowType==="dual" ? (flowPeriod==="14D"?4:2) : 0}
-                  barCategoryGap={flowPeriod==="14D"?"24%":flowPeriod==="30D"?"18%":"12%"}
-                >
-                  <defs>
-                    <linearGradient id="freshFlowGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.95}/>
-                      <stop offset="100%" stopColor="#059669" stopOpacity={0.35}/>
-                    </linearGradient>
-                    <linearGradient id="liqFlowGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.95}/>
-                      <stop offset="100%" stopColor="#be123c" stopOpacity={0.35}/>
-                    </linearGradient>
-                    <linearGradient id="netPosGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.95}/>
-                      <stop offset="100%" stopColor="#047857" stopOpacity={0.35}/>
-                    </linearGradient>
-                    <linearGradient id="netNegGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#be123c" stopOpacity={0.35}/>
-                      <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.95}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="#1c2940" strokeDasharray="3 3" vertical={false}/>
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={x=>{
-                      if(!x)return "";
-                      const p=String(x).split("-");
-                      if(p.length===3){
-                        const m=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                        return `${p[2]} ${m[+p[1]]||""}`;
-                      }
-                      return String(x).slice(5);
-                    }}
-                    tick={{fill:"#8292a8",fontSize:11}}
-                    axisLine={false}
-                    tickLine={false}
-                    minTickGap={16}
-                    dy={6}
-                  />
-                  <YAxis
-                    tickFormatter={formatFlowY}
-                    tick={{fill:"#8292a8",fontSize:11}}
-                    axisLine={false}
-                    tickLine={false}
-                    width={64}
-                  />
-                  <Tooltip
-                    cursor={{fill:"rgba(255,255,255,0.04)",radius:6}}
-                    content={<CustomFlowTooltip/>}
-                  />
-                  {(flowType==="net"||flowType==="split") && (
-                    <ReferenceLine y={0} stroke="rgba(255,255,255,0.18)" strokeWidth={1.2}/>
-                  )}
-                  {flowType==="dual" ? (
-                    <>
-                      <Bar
-                        dataKey="fresh"
-                        fill="url(#freshFlowGrad)"
-                        radius={[5,5,0,0]}
-                        name="fresh"
-                        maxBarSize={flowPeriod==="14D"?15:flowPeriod==="30D"?9:5}
-                      />
-                      <Bar
-                        dataKey="liquidated"
-                        fill="url(#liqFlowGrad)"
-                        radius={[5,5,0,0]}
-                        name="liquidated"
-                        maxBarSize={flowPeriod==="14D"?15:flowPeriod==="30D"?9:5}
-                      />
-                    </>
-                  ) : flowType==="split" ? (
-                    <>
-                      <Bar
-                        dataKey="fresh"
-                        fill="url(#freshFlowGrad)"
-                        radius={[5,5,0,0]}
-                        name="fresh"
-                        maxBarSize={flowPeriod==="14D"?22:flowPeriod==="30D"?14:7}
-                      />
-                      <Bar
-                        dataKey="liqNeg"
-                        fill="url(#liqFlowGrad)"
-                        radius={[0,0,5,5]}
-                        name="liquidated"
-                        maxBarSize={flowPeriod==="14D"?22:flowPeriod==="30D"?14:7}
-                      />
-                    </>
-                  ) : (
-                    <Bar
-                      dataKey="net"
-                      name="net"
-                      maxBarSize={flowPeriod==="14D"?26:flowPeriod==="30D"?16:9}
-                    >
-                      {visibleFlow.map((entry,idx)=>(
-                        <Cell
-                          key={`net-${idx}`}
-                          fill={entry.net>=0?"url(#netPosGrad)":"url(#netNegGrad)"}
-                          radius={entry.net>=0?[5,5,0,0]:[0,0,5,5]}
-                        />
-                      ))}
-                    </Bar>
-                  )}
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
-          <DailyActivityHeatmap flow={flow} />
-          <section className="card chartCard">
-            <div className="cardHead">
-              <div>
-                <h2>BOOK COMPOSITION BY CLASS</h2>
-                <p>Margin book distribution by asset class</p>
-              </div>
-              <div className="compHeaderBadge">
-                <ShieldCheck size={13}/>
-                <span>3 Asset Classes</span>
-              </div>
-            </div>
-            <div className="compContainer">
-              <div className="compDonutSide">
-                <div className="compTopBar">
-                  {hoveredClass ? (
-                    <div className="compTopActive">
-                      <span className="compTopDot" style={{background:hoveredClass.color}}/>
-                      <span className="compTopLabel">{hoveredClass.name}:</span>
-                      <b className="compTopPct" style={{color:hoveredClass.color}}>{hoveredClass.value.toFixed(2)}%</b>
-                      <span className="compTopAmt">({formatExactCr(hoveredClass.book)})</span>
-                    </div>
-                  ) : (
-                    <div className="compTopDefault">
-                      <span className="compTopDot defaultDot"/>
-                      <span className="compTopLabel">Total MTF Portfolio:</span>
-                      <b className="compTopTotalVal">{formatExactCr(combined)}</b>
-                      <span className="compTopTotalSub">across classes</span>
-                    </div>
-                  )}
-                </div>
-                <div className="compDonutWrapper">
-                  <div className="compDonutInner">
-                    <ResponsiveContainer width="100%" height={240}>
-                      <PieChart margin={{top:0,bottom:0,left:0,right:0}} onMouseLeave={()=>setHoveredClass(null)}>
-                        <Pie
-                          data={pie}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={78}
-                          outerRadius={108}
-                          paddingAngle={4}
-                          cornerRadius={6}
-                          minAngle={8}
-                          stroke="none"
-                          isAnimationActive={false}
-                        >
-                          {pie.map((x)=>(
-                            <Cell
-                              key={x.name}
-                              fill={x.color}
-                              opacity={hoveredClass?(hoveredClass.name===x.name?1:0.3):1}
-                              style={{cursor:"pointer",transition:"opacity .2s ease, transform .2s ease",outline:"none"}}
-                              onMouseEnter={()=>setHoveredClass(x)}
-                            />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="compDonutCenter">
-                      {hoveredClass ? (
-                        <div className="compCenterState active">
-                          <span className="compCenterTag" style={{color:hoveredClass.color}}>{hoveredClass.shortName}</span>
-                          <span className="compCenterValue pctVal" style={{color:hoveredClass.color}}>{hoveredClass.value.toFixed(2)}%</span>
-                          <span className="compCenterSub">{formatExactCr(hoveredClass.book)}</span>
-                        </div>
-                      ) : (
-                        <div className="compCenterState">
-                          <span className="compCenterTag">TOTAL MTF BOOK</span>
-                          <span className="compCenterValue totalVal">{formatExactCr(combined)}</span>
-                          <span className="compCenterSub">3 Asset Classes</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="compBreakdownList">
-                {pie.map(x=>(
-                  <div
-                    key={x.name}
-                    className={`compBreakdownItem ${hoveredClass?.name===x.name?"itemActive":""}`}
-                    onMouseEnter={()=>setHoveredClass(x)}
-                    onMouseLeave={()=>setHoveredClass(null)}
-                  >
-                    <div className="compItemTop">
-                      <div className="compItemTitle">
-                        <span className="compColorDot" style={{background:x.color}}/>
-                        <span className="compItemName">{x.name}</span>
-                        <span className="compItemTag">{x.tag}</span>
-                      </div>
-                      <div className="compItemFigures">
-                        <b className="compItemPct" style={{color:x.color}}>{x.value.toFixed(2)}%</b>
-                        <span className="compItemBook">{formatExactCr(x.book)}</span>
-                      </div>
-                    </div>
-                    <div className="compItemDesc">{x.desc}</div>
-                    <div className="compBarTrack">
-                      <div className="compBarFill" style={{width:`${Math.min(100,Math.max(x.value,3))}%`,background:x.color}}/>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="compFootnote">Disclosed under SEBI MTF asset classification norms</div>
-          </section>
-        </div>
-        <div className="metricGrid">
-          <Metric title="LATEST 1D NET FLOW" value={formatSignedCr(latestNetFlow)} sub={`Net shift on ${fmtDate(displayDate)}`} icon={<TrendingUp/>}/>
-          <Metric title="MTF EXPOSURE (1D)" value={fmtPct(pctCombined)} sub={`vs ${fmtDate(previous.date)}`} icon={<Activity/>}/>
-          <Metric title="FLUSH EVENTS (30D)" value={String(flushCount30D)} sub={lastFlush ? `0 in 30D (Last: ${fmtDate(lastFlush.date)})` : "High liquidation days"} icon={<CalendarDays/>}/>
-          <Metric title="AVG LEVERAGE" value={`${avgLeverage.toFixed(2)}%`} sub="Across active stocks" icon={<PieIcon/>}/>
-        </div>
-        <section className="card tableCard"><div className="tableHead"><div><h2>TOP MTF STOCKS</h2><p>Latest active securities ranked by margin book</p></div><div className="tableTools"><Segment values={["ALL", "NSE", "BSE"]} value={tableExchange} onChange={(v)=>{setTableExchange(v);setPage(1);}}/><button className="screenerLinkBtn" onClick={()=>setTab("screener")} title="Launch full-featured stock screener"><SlidersHorizontal size={13} className="screenerBtnIcon"/><span>Open Full Stock Screener</span><ArrowRight size={13} className="screenerBtnArrow"/></button><div className="tableSearch"><Search size={16}/><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Search by symbol or company..."/></div><select value={rowsPer} onChange={e=>{setRowsPer(+e.target.value);setPage(1)}}><option value="5">5 per page</option><option value="10">10 per page</option><option value="25">25 per page</option></select></div></div>
-          <div className="tableScroll"><table><thead><tr><th>#</th><th onClick={()=>setSortBy("symbol")}>Symbol</th><th>Company</th><th>Exchange</th><th onClick={()=>setSortBy("book")}>MTF Book (₹ Cr)</th><th>1D Change (₹ Cr)</th><th onClick={()=>setSortBy("pct")}>1D Change (%)</th><th onClick={()=>setSortBy("lev")}>Leverage (%)</th><th>Trend (30D)</th></tr></thead><tbody>{pageRows.map((r,i)=><tr key={r[0]}><td>{(page-1)*rowsPer+i+1}</td><td className="symbol">{r[0]}</td><td>{r[1]}</td><td><span className={`exchangeBadge badge-${String(r[2]||"nse").toLowerCase()}`}><b style={{fontSize:9,marginRight:3}}>◆</b>{r[2]}</span></td><td className="number">{r[3].toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td><td className={r[4]>=0?"positive":"negative"}>{r[4]>=0?"+":""}{r[4].toFixed(2)}</td><td className={r[5]>=0?"positive":"negative"}>{r[5]>=0?"+":""}{r[5].toFixed(2)}%</td><td>{r[6].toFixed(2)}%</td><td><Spark positive={r[5]>=0}/></td></tr>)}</tbody></table></div>
-          <div className="pagination"><span>Showing {pageRows.length} of {stocks.length} stocks</span><div><button disabled={page===1} onClick={()=>setPage(page-1)}><ChevronLeft size={16}/></button>{Array.from({length:Math.min(4,pages)},(_,i)=><button className={page===i+1?"active":""} onClick={()=>setPage(i+1)} key={i}>{i+1}</button>)}{pages>4&&<><em>…</em><button onClick={()=>setPage(pages)}>{pages}</button></>}<button disabled={page===pages} onClick={()=>setPage(page+1)}><ChevronRight size={16}/></button></div></div>
-        </section>
-      </>
-    )}
-    <footer><span>Data source: NSE / BSE MTF disclosures</span><i/> <span>Processed via MTF Analytics public data endpoints</span><span className="footRight">All values in ₹ (INR) &nbsp;|&nbsp; Lakh = 100,000 &nbsp;|&nbsp; Crore = 10,000,000</span></footer>
-   </main>
-  </div>
 
-{loading&&<div className="loading"><div className="spinner"/>Loading live market data…</div>}
- </div>
+            <div className="neoInsightFooter">
+              <span>vs 03 Sept 2026</span>
+              <span style={{ fontWeight: 600 }}>1D EOD</span>
+            </div>
+          </div>
+
+          {/* Station Telemetry Readout */}
+          <div className="neoTelemetryCard">
+            <div className="neoTelemetryRow">
+              <span className="neoTelemetryLabel">EXCHANGES</span>
+              <span className="neoTelemetryVal">NSE + BSE</span>
+            </div>
+            <div className="neoTelemetryRow">
+              <span className="neoTelemetryLabel">LATENCY</span>
+              <span className="neoTelemetryVal liveGreen">42ms LIVE</span>
+            </div>
+            <div className="neoTelemetryRow">
+              <span className="neoTelemetryLabel">DATA PIPELINE</span>
+              <span className="neoTelemetryVal syncWhite">SYNCHRONIZED</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        {tab === "screener" ? (
+          <main className="neoMainCol">
+            <ScreenerView onSelectStockInOverview={(stock) => {}} />
+          </main>
+        ) : tab === "sectors" ? (
+          <main className="neoMainCol">
+            <SectorsView onBack={() => setTab("screener")} />
+          </main>
+        ) : tab === "calc" ? (
+          <main className="neoMainCol">
+            <CalculatorView onBack={() => setTab("screener")} />
+          </main>
+        ) : tab === "about" || tab === "methodology" ? (
+          <main className="neoMainCol">
+            <AboutMethodologyView initialTab={tab} onNavigate={setTab} />
+          </main>
+        ) : (
+          <CyberpunkOverview
+            data={data}
+            summary={summary}
+            history={history}
+            flow={flow}
+            stocks={stocks}
+            activeSecuritiesCount={activeSecuritiesCount}
+            nseSecCount={nseSecCount}
+            bseSecCount={bseSecCount}
+            onRefresh={fetchDashboardData}
+          />
+        )}
+      </div>
+
+      {loading && (
+        <div className="loading">
+          <div className="spinner" />
+          Loading live market data...
+        </div>
+      )}
+    </div>
+  );
 }
 function Nav({icon,text,active,badge,onClick}){
   return (

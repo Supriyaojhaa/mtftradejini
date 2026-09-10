@@ -8207,3 +8207,694 @@ html[data-theme=light] .mobileDrawerHeader {
     opacity: 0.85 !important;
   }
 }
+
+/* ==========================================================================
+   Cyberpunk Dark Emerald Neo-Terminal Cockpit UI
+   ========================================================================== */
+.neoTerminalApp {
+  min-height: 100vh;
+  background-color: #070a0e;
+  color: #f8fafc;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  padding: 14px 18px 24px;
+  box-sizing: border-box;
+}
+
+.neoLayoutRoot {
+  display: flex;
+  gap: 14px;
+  max-width: 1720px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+/* Sidebar Column */
+.neoSidebarCol {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.neoNavContainer {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.neoNavItem {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8b9cb4;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  width: 100%;
+  text-align: left;
+  user-select: none;
+}
+
+.neoNavItem:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.neoNavItem.active {
+  background: #121a28;
+  color: #ffffff;
+  font-weight: 600;
+  border-color: rgba(23, 34, 51, 0.8);
+}
+
+.neoNavItem.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3.5px;
+  background: #00f090;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 10px rgba(0, 240, 144, 0.7);
+}
+
+.neoLiveBadge {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #00f090;
+  background: rgba(0, 240, 144, 0.12);
+  border: 1px solid rgba(0, 240, 144, 0.28);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Insight Card */
+.neoInsightCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.neoInsightHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.neoInsightTitle {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
+.neoPulseDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff3b57;
+  box-shadow: 0 0 8px #ff3b57;
+  animation: neoPulseAnim 2s infinite;
+}
+
+@keyframes neoPulseAnim {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 59, 87, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(255, 59, 87, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 59, 87, 0); }
+}
+
+.neoInsightSub {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-top: 8px;
+}
+
+.neoInsightHero {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ff3b57;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: -0.02em;
+  margin: 4px 0 2px;
+}
+
+.neoInsightDetail {
+  font-size: 11px;
+  color: #8b9cb4;
+}
+
+.neoInsightSpark {
+  height: 48px;
+  margin: 10px -4px 6px;
+}
+
+.neoInsightFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: #56657a;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Station Telemetry Card */
+.neoTelemetryCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.neoTelemetryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+}
+
+.neoTelemetryLabel {
+  color: #56657a;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.neoTelemetryVal {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.neoTelemetryVal.liveGreen {
+  color: #00f090;
+  font-weight: 700;
+}
+
+.neoTelemetryVal.syncWhite {
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+/* Main Content Area */
+.neoMainCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* KPI 4-Card Row */
+.neoKpiRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.neoKpiCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  height: 142px;
+  box-sizing: border-box;
+}
+
+.neoKpiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.neoKpiTitle {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #8b9cb4;
+  letter-spacing: 0.04em;
+}
+
+.neoKpiBadgeIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neoKpiBadgeIcon.green {
+  background: rgba(0, 240, 144, 0.12);
+  border: 1px solid rgba(0, 240, 144, 0.28);
+  color: #00f090;
+}
+
+.neoKpiBadgeIcon.cyan {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #38bdf8;
+}
+
+.neoPillNse {
+  background: #0f2744;
+  border: 1px solid #1e3a5f;
+  color: #38bdf8;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.neoPillBse {
+  background: #331f06;
+  border: 1px solid #5a3809;
+  color: #f59e0b;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.neoKpiValueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.neoKpiValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: -0.02em;
+}
+
+.neoKpiUnit {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.neoKpiDeltaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 4px;
+  z-index: 2;
+}
+
+.neoKpiDeltaGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.neoDeltaItem {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: "IBM Plex Mono", monospace;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.neoDeltaItem.red { color: #ff3b57; }
+.neoDeltaItem.green { color: #00f090; }
+
+.neoDeltaPct {
+  font-size: 10.5px;
+  font-family: "IBM Plex Mono", monospace;
+}
+.neoDeltaPct.red { color: #ff3b57; }
+.neoDeltaPct.green { color: #00f090; }
+
+.neoKpiSubLabel {
+  font-size: 10.5px;
+  color: #64748b;
+  text-align: right;
+  line-height: 1.3;
+}
+
+.neoKpiSparkWrap {
+  height: 28px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.neoSecuritiesSplit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 8px;
+}
+
+.neoDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.neoDot.blue { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
+.neoDot.amber { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+/* Lower Section: Chart + Telemetry */
+.neoLowerRow {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.neoMainChartCard {
+  flex: 1;
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 16px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+}
+
+.neoChartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.neoChartTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.neoChartTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.neoAccentBar {
+  width: 3.5px;
+  height: 15px;
+  background: #00f090;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0, 240, 144, 0.7);
+}
+
+.neoChartTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.neoChartSubtitle {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+  padding-left: 12px;
+}
+
+.neoChartControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.neoPillGroup {
+  display: flex;
+  background: #090e17;
+  border: 1px solid #172233;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.neoFilterBtn {
+  background: transparent;
+  border: none;
+  color: #8b9cb4;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.neoFilterBtn:hover {
+  color: #ffffff;
+}
+
+.neoFilterBtn.active {
+  background: #00f090;
+  color: #070a0e;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(0, 240, 144, 0.4);
+}
+
+.neoExchangeBtn.active {
+  background: #172437;
+  color: #ffffff;
+}
+
+.neoChartBody {
+  height: 275px;
+  margin: 12px 0 6px;
+}
+
+.neoChartFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 11px;
+  color: #8b9cb4;
+}
+
+.neoLegendGroup {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.neoLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.neoLegendLine {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+.neoLegendLine.emerald { background: #00f090; box-shadow: 0 0 6px #00f090; }
+.neoLegendLine.amber { background: #f59e0b; }
+
+.neoCarouselPill {
+  background: #121926;
+  border: 1px solid #1f2b3e;
+  border-radius: 999px;
+  padding: 3px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #8b9cb4;
+  font-family: "IBM Plex Mono", monospace;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.neoCarouselPill:hover {
+  border-color: #38bdf8;
+  color: #f1f5f9;
+}
+
+.neoAllTimeHigh {
+  font-size: 11px;
+  color: #8b9cb4;
+}
+
+.neoAllTimeHigh b {
+  color: #00f090;
+  font-family: "IBM Plex Mono", monospace;
+  margin-left: 4px;
+}
+
+/* Right Telemetry Column */
+.neoTelemetryCol {
+  width: 270px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.neoStatCard {
+  background: #0d131f;
+  border: 1px solid #172233;
+  border-radius: 10px;
+  padding: 13px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.neoStatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.neoStatTitle {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.06em;
+}
+
+.neoStatIconBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neoStatIconBtn.red {
+  background: rgba(255, 59, 87, 0.12);
+  border: 1px solid rgba(255, 59, 87, 0.28);
+  color: #ff3b57;
+}
+
+.neoStatIconBtn.green {
+  background: rgba(0, 240, 144, 0.12);
+  border: 1px solid rgba(0, 240, 144, 0.28);
+  color: #00f090;
+}
+
+.neoStatIconBtn.amber {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  color: #f59e0b;
+}
+
+.neoStatIconBtn.cyan {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #38bdf8;
+}
+
+.neoStatValue {
+  font-size: 21px;
+  font-weight: 700;
+  font-family: "IBM Plex Mono", monospace;
+  margin: 3px 0 1px;
+  letter-spacing: -0.02em;
+}
+
+.neoStatValue.red { color: #ff3b57; }
+.neoStatValue.green { color: #00f090; }
+.neoStatValue.white { color: #ffffff; }
+
+.neoStatSub {
+  font-size: 10.5px;
+  color: #56657a;
+}
+
+/* Floating Action Button */
+.neoFloatingBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 22px;
+  z-index: 50;
+  background: #141b27;
+  border: 1px solid #233145;
+  color: #f1f5f9;
+  padding: 7px 15px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.neoFloatingBtn:hover {
+  background: #1c2738;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+@media (max-width: 1280px) {
+  .neoLayoutRoot {
+    flex-direction: column;
+  }
+  .neoSidebarCol {
+    width: 100%;
+  }
+  .neoKpiRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .neoLowerRow {
+    flex-direction: column;
+  }
+  .neoTelemetryCol {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .neoKpiRow {
+    grid-template-columns: 1fr;
+  }
+  .neoTelemetryCol {
+    grid-template-columns: 1fr;
+  }
+}
+
