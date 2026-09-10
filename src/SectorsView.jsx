@@ -40,6 +40,7 @@ import {
   Zap,
   CheckCircle2,
   Grid3X3,
+  LayoutGrid,
   BarChart3,
   RefreshCw,
   Info,
@@ -487,12 +488,15 @@ export default function SectorsView({ onBack }) {
     };
   }, [sectors]);
 
-  // Squarified Treemap layout items
+  // Squarified Treemap layout items with damped proportional weighting
   const treemapTiles = useMemo(() => {
     if (sectors.length === 0) return [];
+    // Apply power dampening (exponent 0.35) so sector hierarchy is preserved,
+    // large sectors don't have massive empty voids, and smaller sectors (like ETFs)
+    // are guaranteed ample height (>=100px) and width (>=31%) to display all metrics cleanly without clipping.
     const items = sectors.map((s) => ({
       ...s,
-      weight: Math.max(10, s.bookCr),
+      weight: Math.pow(Math.max(10, s.bookCr), 0.35),
     }));
     return computeSquarifiedLayout(items, 0, 0, 100, 100);
   }, [sectors]);
@@ -962,10 +966,18 @@ export default function SectorsView({ onBack }) {
               <button
                 className={viewMode === "treemap" ? "on" : ""}
                 onClick={() => setViewMode("treemap")}
-                title="Interactive Squarified Treemap Heatmap"
+                title="Interactive Proportional Heatmap Treemap"
               >
                 <Grid3X3 size={14} style={{ marginRight: 5, verticalAlign: "middle" }} />
                 Heatmap View
+              </button>
+              <button
+                className={viewMode === "grid" ? "on" : ""}
+                onClick={() => setViewMode("grid")}
+                title="Structured Uniform Sector Cards Grid View"
+              >
+                <LayoutGrid size={14} style={{ marginRight: 5, verticalAlign: "middle" }} />
+                Grid View
               </button>
               <button
                 className={viewMode === "quadrant" ? "on" : ""}
@@ -987,6 +999,8 @@ export default function SectorsView({ onBack }) {
             <h2 className="vizTitle">
               {viewMode === "treemap"
                 ? "SECTOR LEVERAGE HEATMAP (TREEMAP VIEW)"
+                : viewMode === "grid"
+                ? "SECTOR LEVERAGE HEATMAP (GRID VIEW)"
                 : "RISK VS. MOMENTUM QUADRANT MATRIX"}
             </h2>
             <p className="vizSub">
@@ -994,12 +1008,16 @@ export default function SectorsView({ onBack }) {
                 ? `Tile size represents Total MTF Financed Book (₹ Cr). Colors represent ${
                     colorMetric === "pctChange" ? `${timeHorizon} % MTF Change` : "MTF as % of Free Float"
                   }. Click any tile to inspect sector constituents.`
+                : viewMode === "grid"
+                ? `Uniform balanced sector matrix. Colors represent ${
+                    colorMetric === "pctChange" ? `${timeHorizon} % MTF Change` : "MTF as % of Free Float"
+                  }. Click any card to inspect sector constituents.`
                 : `X-Axis: Free-Float Leverage % (Crowding). Y-Axis: ${timeHorizon} % MTF Change (Momentum). Bubble size: MTF Book. Click any bubble to inspect sector.`}
             </p>
           </div>
 
           {/* Legend */}
-          {viewMode === "treemap" ? (
+          {viewMode !== "quadrant" ? (
             <div className="treemapLegend">
               {colorMetric === "pctChange" ? (
                 <>
@@ -1164,7 +1182,79 @@ export default function SectorsView({ onBack }) {
           </div>
         )}
 
-        {/* View Mode 2: Quadrant / Scatter Matrix View */}
+        {/* View Mode 2: Uniform Sector Cards Grid */}
+        {viewMode === "grid" && (
+          <div className="sectorsGridContainer">
+            {sectors.map((sector) => {
+              const IconComp = sector.config.icon || Landmark;
+              const bgStyle = getTileBgStyle(sector);
+              const isSelected = selectedSector?.name === sector.name;
+
+              return (
+                <div
+                  key={sector.name}
+                  className={`sectorGridCard ${isSelected ? "selectedTile" : ""}`}
+                  style={{
+                    background: bgStyle.background,
+                    borderColor: isSelected ? "#38bdf8" : bgStyle.borderColor,
+                    boxShadow: isSelected ? "0 0 16px rgba(56, 189, 248, 0.4)" : "none",
+                  }}
+                  onClick={() => setSelectedSector(sector)}
+                >
+                  {/* Card Top: Icon, Name & Share */}
+                  <div className="tileHeader">
+                    <div className="tileTitleRow">
+                      <div className="tileIconBox" style={{ color: sector.config.color }}>
+                        <IconComp size={15} />
+                      </div>
+                      <span className="tileSectorName" style={{ color: bgStyle.textColor, fontSize: "13px" }}>
+                        {sector.name}
+                      </span>
+                    </div>
+                    <span
+                      className="tileShareBadge"
+                      style={{ background: bgStyle.badgeBg, color: bgStyle.badgeText }}
+                    >
+                      {sector.sharePct}%
+                    </span>
+                  </div>
+
+                  {/* Card Center: Total MTF Book (₹ Cr) */}
+                  <div className="tileValueRow" style={{ margin: "10px 0" }}>
+                    <b className="tileBookCr" style={{ color: bgStyle.textColor, fontSize: "17px" }}>
+                      {formatExactCr(sector.bookCr)}
+                    </b>
+                    <span
+                      className="tileChangePill"
+                      style={{
+                        background: bgStyle.pillBg,
+                        color: bgStyle.pillText,
+                        borderColor: bgStyle.pillBorder,
+                        fontSize: "11px",
+                      }}
+                    >
+                      {sector.change >= 0 ? "+" : ""}
+                      {sector.change}%
+                    </span>
+                  </div>
+
+                  {/* Card Footer: MTF/FF ratio & Stock Count */}
+                  <div className="tileFooter" style={{ borderTopColor: bgStyle.footerBorder, color: bgStyle.subColor }}>
+                    <span className="tileFfLev" style={{ color: bgStyle.subColor }}>
+                      <span>FF Lev: </span>
+                      <b style={{ color: bgStyle.textColor }}>{sector.ffLevPct}%</b>
+                    </span>
+                    <span className="tileStockCount" style={{ color: bgStyle.subColor }}>
+                      <span>{sector.stockCount} Stocks</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* View Mode 3: Quadrant / Scatter Matrix View */}
         {viewMode === "quadrant" && (
           <div className="quadrantContainer">
             {/* Background 4 Quadrants Labels */}
