@@ -8216,16 +8216,210 @@ html[data-theme=light] .mobileDrawerHeader {
   background-color: #070a0e;
   color: #f8fafc;
   font-family: Inter, system-ui, -apple-system, sans-serif;
-  padding: 14px 18px 24px;
+  padding: 0 0 24px 0;
   box-sizing: border-box;
+}
+
+html[data-theme="light"] .neoTerminalApp,
+.neoTerminalApp.light {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   Header Bar (Exchange Disclosure & Navigation)
+   ========================================================================== */
+.neoTopbar {
+  height: 58px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+html[data-theme="dark"] .neoTopbar,
+.neoTerminalApp.dark .neoTopbar {
+  background: #080c14;
+  border-bottom: 1px solid #162032;
+}
+
+.neoTopbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.neoBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.neoBrandMark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 23px;
+  flex-shrink: 0;
+}
+
+.neoBrandMark .neoBar {
+  width: 4px;
+  background: #00d084;
+  border-radius: 999px;
+  display: block;
+}
+
+.neoBrandMark .b1 { height: 11px; }
+.neoBrandMark .b2 { height: 17px; }
+.neoBrandMark .b3 { height: 23px; }
+.neoBrandMark .b4 { height: 14px; }
+
+.neoBrandTitle {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .neoBrandTitle,
+.neoTerminalApp.dark .neoBrandTitle {
+  color: #ffffff;
+}
+
+.neoLiveCircle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #00d084;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(0, 208, 132, 0.35);
+  cursor: help;
+}
+
+.neoLiveDot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: block;
+}
+
+.neoDisclosure {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5px;
+}
+
+.neoDisclosureTitle {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #0f172a;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+html[data-theme="dark"] .neoDisclosureTitle,
+.neoTerminalApp.dark .neoDisclosureTitle {
+  color: #f1f5f9;
+}
+
+.neoDisclosureSubtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .neoDisclosureSubtitle,
+.neoTerminalApp.dark .neoDisclosureSubtitle {
+  color: #8b9cb4;
+}
+
+.neoTopbarRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.neoThemeBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.neoThemeBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+html[data-theme="dark"] .neoThemeBtn,
+.neoTerminalApp.dark .neoThemeBtn {
+  background: #0d131f;
+  border-color: #1a273b;
+  color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .neoThemeBtn:hover,
+.neoTerminalApp.dark .neoThemeBtn:hover {
+  background: #141c2d;
+  border-color: #243550;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .neoTopbar {
+    padding: 0 14px;
+    height: 52px;
+  }
+  .neoTopbarLeft {
+    gap: 12px;
+  }
+  .neoBrandTitle {
+    font-size: 13.5px;
+  }
+  .neoDisclosureTitle {
+    font-size: 10px;
+  }
+  .neoDisclosureSubtitle {
+    font-size: 9.5px;
+  }
 }
 
 .neoLayoutRoot {
   display: flex;
   gap: 14px;
   max-width: 1720px;
-  margin: 0 auto;
+  margin: 14px auto 0;
+  padding: 0 18px;
   align-items: flex-start;
+  box-sizing: border-box;
 }
 
 /* Sidebar Column */

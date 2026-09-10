@@ -789,7 +789,52 @@ function App(){
   const setSortBy=k=>{if(sort===k)setSortAsc(!sortAsc);else{setSort(k);setSortAsc(false)}};
 
   return (
-    <div className="neoTerminalApp">
+    <div className={`neoTerminalApp ${dark ? "dark" : "light"}`}>
+      {/* Top Header Bar matching design reference */}
+      <header className="neoTopbar">
+        <div className="neoTopbarLeft">
+          <div
+            className="neoBrand"
+            onClick={() => setTab("overview")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setTab("overview"); }}
+            role="button"
+            tabIndex={0}
+            title="MTF Analytics - Home"
+          >
+            <div className="neoBrandMark" aria-hidden="true">
+              <span className="neoBar b1" />
+              <span className="neoBar b2" />
+              <span className="neoBar b3" />
+              <span className="neoBar b4" />
+            </div>
+            <span className="neoBrandTitle">MTF ANALYTICS</span>
+          </div>
+
+          <div className="neoLiveCircle" title="Live Exchange Sync" aria-label="Live Exchange Feed">
+            <span className="neoLiveDot" />
+          </div>
+
+          <div className="neoDisclosure">
+            <div className="neoDisclosureTitle">EXCHANGE DISCLOSURE</div>
+            <div className="neoDisclosureSubtitle">
+              As of {fmtDate(displayDate) || "08 Sept 2026"} • Latest Released
+            </div>
+          </div>
+        </div>
+
+        <div className="neoTopbarRight">
+          <button
+            type="button"
+            className="neoThemeBtn"
+            onClick={toggleTheme}
+            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label="Toggle theme"
+          >
+            {dark ? <Sun size={17} strokeWidth={2} /> : <Moon size={17} strokeWidth={2} />}
+          </button>
+        </div>
+      </header>
+
       <div className="neoLayoutRoot">
         {/* Left Sidebar */}
         <aside className="neoSidebarCol">
