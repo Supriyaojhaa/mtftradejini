@@ -357,7 +357,7 @@ export default function CyberpunkOverview({
     };
   }, [visibleFlow]);
 
-  // Heatmap calculations
+  // Heatmap calculations - 5 Trading Days (Mon to Fri) for Indian Markets (NSE/BSE)
   const { weeksData, monthLabels } = useMemo(() => {
     const flowMap = new Map();
     if (Array.isArray(flow)) {
@@ -367,28 +367,27 @@ export default function CyberpunkOverview({
     }
 
     const weeks = [];
-    const mLabels = [
-      { weekIdx: 0, name: "Sep" },
-      { weekIdx: 5, name: "Oct" },
-      { weekIdx: 9, name: "Nov" },
-      { weekIdx: 13, name: "Dec" },
-      { weekIdx: 18, name: "Jan" },
-      { weekIdx: 22, name: "Feb" },
-      { weekIdx: 26, name: "Mar" },
-      { weekIdx: 31, name: "Apr" },
-      { weekIdx: 35, name: "May" },
-      { weekIdx: 39, name: "Jun" },
-      { weekIdx: 44, name: "Jul" },
-      { weekIdx: 48, name: "Aug" }
-    ];
-
-    const start = new Date(2025, 7, 31);
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
-    for (let w = 0; w < 53; w++) {
+    const totalWeeks = 53;
+    // Monday, 1 September 2025 (Start of 53-week rolling 1-year window)
+    const start = new Date(2025, 8, 1);
+
+    const mLabels = [];
+    let lastM = -1;
+
+    for (let w = 0; w < totalWeeks; w++) {
       const days = [];
-      for (let d = 0; d < 7; d++) {
+      const mondayDate = new Date(start);
+      mondayDate.setDate(start.getDate() + w * 7);
+      const m = mondayDate.getMonth();
+      if (m !== lastM) {
+        mLabels.push({ weekIdx: w, name: monthsShort[m] });
+        lastM = m;
+      }
+
+      for (let d = 0; d < 5; d++) {
         const dt = new Date(start);
         dt.setDate(start.getDate() + w * 7 + d);
         const yyyy = dt.getFullYear();
@@ -398,55 +397,43 @@ export default function CyberpunkOverview({
         const shortDateStr = `${dt.getDate()} ${monthsShort[dt.getMonth()]} ${yyyy}`;
         const fullDateStr = `${dayNames[d]}, ${shortDateStr}`;
 
-        const isTargetDefault = yyyy === 2025 && dt.getMonth() === 11 && dt.getDate() === 31;
-        const isWeekend = d === 0 || d === 6;
-        const isMuhurat = (w === 22 && d === 0);
-        let isTrading = !isWeekend || isMuhurat;
+        const isTrading = true;
         let net = 0, fresh = 0, liq = 0, upCount = 0, downCount = 0, upCr = 0, downCr = 0, intensity = 0;
 
-        if (isTargetDefault) {
-          net = -315.7;
-          upCount = 1310;
-          upCr = 1140;
-          downCount = 1570;
-          downCr = 1450;
-          intensity = -2;
-        } else if (isTrading) {
-          const f = flowMap.get(dateStr);
-          if (f) {
-            net = (f.net !== undefined ? f.net : (f.fresh - f.liquidated)) / 100;
-            fresh = (f.fresh || 0) / 100;
-            liq = (f.liquidated || 0) / 100;
+        const f = flowMap.get(dateStr);
+        if (f) {
+          net = (f.net !== undefined && f.net !== 0 ? f.net : (f.fresh - f.liquidated)) / 100;
+          fresh = (f.fresh || 0) / 100;
+          liq = (f.liquidated || 0) / 100;
+        } else {
+          const seed = (w * 5 + d) * 19 + dt.getDate() * 29;
+          const pseudo = Math.sin(seed);
+          if (pseudo > 0.12) {
+            net = Math.round((140 + Math.sin(seed * 2) * 320) * 10) / 10;
+            fresh = Math.round(net * 1.45 + 180);
+            liq = fresh - net;
+          } else if (pseudo < -0.12) {
+            net = Math.round((-110 + Math.cos(seed * 3) * 360) * 10) / 10;
+            liq = Math.round(Math.abs(net) * 1.35 + 180);
+            fresh = liq + net;
           } else {
-            const seed = (w * 7 + d) * 19 + dt.getDate() * 29;
-            const pseudo = Math.sin(seed);
-            if (pseudo > 0.08) {
-              net = Math.round((140 + Math.sin(seed * 2) * 320) * 10) / 10;
-              fresh = Math.round(net * 1.45 + 180);
-              liq = fresh - net;
-            } else if (pseudo < -0.12) {
-              net = Math.round((-110 + Math.cos(seed * 3) * 360) * 10) / 10;
-              liq = Math.round(Math.abs(net) * 1.35 + 180);
-              fresh = liq + net;
-            } else {
-              net = Math.round(Math.sin(seed * 5) * 50 * 10) / 10;
-              fresh = 200;
-              liq = 200 - net;
-            }
+            net = Math.round(Math.sin(seed * 5) * 50 * 10) / 10;
+            fresh = 200;
+            liq = 200 - net;
           }
-
-          if (net > 320) intensity = 3;
-          else if (net > 120) intensity = 2;
-          else if (net > 0) intensity = 1;
-          else if (net < -320) intensity = -3;
-          else if (net < -120) intensity = -2;
-          else if (net < 0) intensity = -1;
-
-          upCount = Math.round(1100 + Math.abs(net) * 1.1);
-          downCount = Math.round(1250 + Math.abs(net) * 0.95);
-          upCr = Math.round(950 + Math.abs(net) * 1.2);
-          downCr = Math.round(900 + Math.abs(net) * 1.3);
         }
+
+        if (net > 300) intensity = 3;
+        else if (net > 100) intensity = 2;
+        else if (net > 0) intensity = 1;
+        else if (net < -300) intensity = -3;
+        else if (net < -100) intensity = -2;
+        else if (net < 0) intensity = -1;
+
+        upCount = Math.round(1100 + Math.abs(net) * 1.1);
+        downCount = Math.round(1250 + Math.abs(net) * 0.95);
+        upCr = Math.round(Math.max(800, fresh * 2.6));
+        downCr = Math.round(Math.max(750, liq * 2.6));
 
         days.push({
           date: dateStr,
@@ -454,7 +441,6 @@ export default function CyberpunkOverview({
           fullDate: fullDateStr,
           dayOfWeek: d,
           isTrading,
-          isTargetDefault,
           net,
           fresh,
           liq,
@@ -470,16 +456,28 @@ export default function CyberpunkOverview({
     return { weeksData: weeks, monthLabels: mLabels };
   }, [flow]);
 
-  const defaultDay = useMemo(() => ({
-    shortDate: "31 Dec 2025",
-    fullDate: "Wed, 31 Dec 2025",
-    upCount: 1310,
-    upCr: 1140,
-    downCount: 1570,
-    downCr: 1450,
-    net: -315.7,
-    date: "2025-12-31"
-  }), []);
+  const defaultDay = useMemo(() => {
+    if (weeksData && weeksData.length) {
+      for (let w = weeksData.length - 1; w >= 0; w--) {
+        const week = weeksData[w];
+        for (let d = week.length - 1; d >= 0; d--) {
+          if (week[d] && week[d].net !== 0) {
+            return week[d];
+          }
+        }
+      }
+    }
+    return {
+      shortDate: "08 Sept 2026",
+      fullDate: "Tue, 08 Sept 2026",
+      upCount: 1380,
+      upCr: 1250,
+      downCount: 1210,
+      downCr: 1091,
+      net: 158.9,
+      date: "2026-09-08"
+    };
+  }, [weeksData]);
 
   const activeDay = hoveredDay || selectedDay || defaultDay;
 
@@ -1154,13 +1152,11 @@ export default function CyberpunkOverview({
 
           <div className="neoHeatmapBody">
             <div className="neoHeatmapDaysCol">
-              <span style={{ visibility: "hidden" }}>Sun</span>
               <span>Mon</span>
               <span style={{ visibility: "hidden" }}>Tue</span>
               <span>Wed</span>
               <span style={{ visibility: "hidden" }}>Thu</span>
               <span>Fri</span>
-              <span style={{ visibility: "hidden" }}>Sat</span>
             </div>
 
             <div className="neoHeatmapCols">
