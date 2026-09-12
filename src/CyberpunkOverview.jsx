@@ -390,6 +390,15 @@ export default function CyberpunkOverview({
   const yDomain = useMemo(() => {
     if (!chartData || !chartData.length) return [0, 160000];
 
+    if (exchange === "ALL") {
+      let max = 0;
+      chartData.forEach((d) => {
+        if (d.combined > max) max = d.combined;
+      });
+      const ceiling = Math.ceil((max * 1.08) / 10000) * 10000;
+      return [0, Math.max(ceiling, 10000)];
+    }
+
     const values = chartData
       .map((d) => d[activeMetricKey])
       .filter((v) => v != null && !isNaN(v) && v > 0);
@@ -413,7 +422,7 @@ export default function CyberpunkOverview({
       high = high + 500;
     }
     return [low, high];
-  }, [chartData, activeMetricKey, period]);
+  }, [chartData, activeMetricKey, exchange, period]);
 
   // Flow data processing
   const visibleFlow = useMemo(() => {
@@ -856,18 +865,18 @@ export default function CyberpunkOverview({
               >
                 <defs>
                   <linearGradient id="neoEmeraldFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00f090" stopOpacity={0.45} />
-                    <stop offset="60%" stopColor="#00f090" stopOpacity={0.12} />
-                    <stop offset="100%" stopColor="#00f090" stopOpacity={0.01} />
+                    <stop offset="0%" stopColor={dark ? "#00f090" : "#059669"} stopOpacity={dark ? 0.45 : 0.25} />
+                    <stop offset="60%" stopColor={dark ? "#00f090" : "#059669"} stopOpacity={dark ? 0.12 : 0.08} />
+                    <stop offset="100%" stopColor={dark ? "#00f090" : "#059669"} stopOpacity={0.01} />
                   </linearGradient>
                   <linearGradient id="neoBlueFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.45} />
-                    <stop offset="60%" stopColor="#38bdf8" stopOpacity={0.12} />
-                    <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.01} />
+                    <stop offset="0%" stopColor={dark ? "#38bdf8" : "#0284c7"} stopOpacity={dark ? 0.35 : 0.2} />
+                    <stop offset="60%" stopColor={dark ? "#38bdf8" : "#0284c7"} stopOpacity={dark ? 0.1 : 0.05} />
+                    <stop offset="100%" stopColor={dark ? "#38bdf8" : "#0284c7"} stopOpacity={0.01} />
                   </linearGradient>
                   <linearGradient id="neoAmberFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor={dark ? "#f59e0b" : "#d97706"} stopOpacity={dark ? 0.35 : 0.2} />
+                    <stop offset="100%" stopColor={dark ? "#f59e0b" : "#d97706"} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -923,23 +932,32 @@ export default function CyberpunkOverview({
                       type="monotone"
                       dataKey="combined"
                       name="combined"
-                      stroke="#00f090"
+                      stroke={dark ? "#00f090" : "#059669"}
                       strokeWidth={2.5}
                       fill="url(#neoEmeraldFill)"
                       dot={false}
-                      activeDot={{ r: 5, fill: "#00f090", stroke: "#070a0e", strokeWidth: 2 }}
+                      activeDot={{ r: 5, fill: dark ? "#00f090" : "#059669", stroke: dark ? "#070a0e" : "#ffffff", strokeWidth: 2 }}
                     />
-                    {period === "ALL" && (
-                      <Area
-                        type="monotone"
-                        dataKey="bse"
-                        name="bse"
-                        stroke="#f59e0b"
-                        strokeWidth={1.8}
-                        fill="url(#neoAmberFill)"
-                        dot={false}
-                      />
-                    )}
+                    <Area
+                      type="monotone"
+                      dataKey="nse"
+                      name="nse"
+                      stroke={dark ? "#38bdf8" : "#0284c7"}
+                      strokeWidth={2}
+                      fill="url(#neoBlueFill)"
+                      dot={false}
+                      activeDot={{ r: 4, fill: dark ? "#38bdf8" : "#0284c7", stroke: dark ? "#070a0e" : "#ffffff", strokeWidth: 2 }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="bse"
+                      name="bse"
+                      stroke={dark ? "#f59e0b" : "#d97706"}
+                      strokeWidth={1.8}
+                      fill="url(#neoAmberFill)"
+                      dot={false}
+                      activeDot={{ r: 4, fill: dark ? "#f59e0b" : "#d97706", stroke: dark ? "#070a0e" : "#ffffff", strokeWidth: 2 }}
+                    />
                   </>
                 )}
                 {exchange === "NSE" && (
@@ -947,11 +965,11 @@ export default function CyberpunkOverview({
                     type="monotone"
                     dataKey="nse"
                     name="nse"
-                    stroke="#38bdf8"
+                    stroke={dark ? "#38bdf8" : "#0284c7"}
                     strokeWidth={2.5}
                     fill="url(#neoBlueFill)"
                     dot={false}
-                    activeDot={{ r: 5, fill: "#38bdf8", stroke: "#070a0e", strokeWidth: 2 }}
+                    activeDot={{ r: 5, fill: dark ? "#38bdf8" : "#0284c7", stroke: dark ? "#070a0e" : "#ffffff", strokeWidth: 2 }}
                   />
                 )}
                 {exchange === "BSE" && (
@@ -959,11 +977,11 @@ export default function CyberpunkOverview({
                     type="monotone"
                     dataKey="bse"
                     name="bse"
-                    stroke="#f59e0b"
+                    stroke={dark ? "#f59e0b" : "#d97706"}
                     strokeWidth={2.5}
                     fill="url(#neoAmberFill)"
                     dot={false}
-                    activeDot={{ r: 5, fill: "#f59e0b", stroke: "#070a0e", strokeWidth: 2 }}
+                    activeDot={{ r: 5, fill: dark ? "#f59e0b" : "#d97706", stroke: dark ? "#070a0e" : "#ffffff", strokeWidth: 2 }}
                   />
                 )}
               </AreaChart>
@@ -976,26 +994,28 @@ export default function CyberpunkOverview({
                 <>
                   <div className="neoLegendItem">
                     <span className="neoLegendLine emerald" />
-                    <span style={{ color: "#cbd5e1" }}>Combined (NSE + BSE)</span>
+                    <span style={{ color: dark ? "#cbd5e1" : "#475569" }}>Combined (NSE + BSE)</span>
                   </div>
-                  {period === "ALL" && (
-                    <div className="neoLegendItem">
-                      <span className="neoLegendLine amber" />
-                      <span>BSE Only</span>
-                    </div>
-                  )}
+                  <div className="neoLegendItem">
+                    <span className="neoLegendLine blue" />
+                    <span style={{ color: dark ? "#cbd5e1" : "#475569" }}>NSE Only</span>
+                  </div>
+                  <div className="neoLegendItem">
+                    <span className="neoLegendLine amber" />
+                    <span style={{ color: dark ? "#cbd5e1" : "#475569" }}>BSE Only</span>
+                  </div>
                 </>
               )}
               {exchange === "NSE" && (
                 <div className="neoLegendItem">
-                  <span className="neoLegendLine" style={{ background: "#38bdf8" }} />
-                  <span style={{ color: "#cbd5e1" }}>NSE MTF Book</span>
+                  <span className="neoLegendLine blue" />
+                  <span style={{ color: dark ? "#cbd5e1" : "#475569" }}>NSE MTF Book</span>
                 </div>
               )}
               {exchange === "BSE" && (
                 <div className="neoLegendItem">
                   <span className="neoLegendLine amber" />
-                  <span style={{ color: "#cbd5e1" }}>BSE MTF Book</span>
+                  <span style={{ color: dark ? "#cbd5e1" : "#475569" }}>BSE MTF Book</span>
                 </div>
               )}
             </div>
