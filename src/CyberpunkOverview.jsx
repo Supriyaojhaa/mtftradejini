@@ -21,7 +21,6 @@ import {
   Activity,
   CalendarDays,
   Target,
-  RotateCcw,
   LayoutGrid,
   Search,
   SlidersHorizontal,
@@ -202,7 +201,6 @@ export default function CyberpunkOverview({
 }) {
   const [period, setPeriod] = useState("ALL");
   const [exchange, setExchange] = useState("ALL");
-  const [isRotating, setIsRotating] = useState(false);
 
   // Flow section states
   const [flowPeriod, setFlowPeriod] = useState("14D");
@@ -620,12 +618,6 @@ export default function CyberpunkOverview({
       { name: "ETFs", value: 2.48, book: 381322.67, color: "#f59e0b", tag: "Index & Commodity", desc: "Exchange-traded index, sectoral, and gold ETF positions" }
     ];
   }, [comp]);
-
-  const handleRestartClick = () => {
-    setIsRotating(true);
-    if (onRefresh) onRefresh();
-    setTimeout(() => setIsRotating(false), 800);
-  };
 
   return (
     <div className="neoMainCol">
@@ -1541,22 +1533,6 @@ export default function CyberpunkOverview({
           </div>
         </div>
       </div>
-
-      {/* Floating Bottom-Right Action Button */}
-      <button
-        className="neoFloatingBtn"
-        onClick={handleRestartClick}
-        title="Reload live feeds and refresh calculations"
-      >
-        <RotateCcw
-          size={13}
-          style={{
-            transform: isRotating ? "rotate(360deg)" : "none",
-            transition: "transform 0.8s ease"
-          }}
-        />
-        <span>Restart R</span>
-      </button>
     </div>
   );
 }

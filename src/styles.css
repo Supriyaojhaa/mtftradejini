@@ -9055,33 +9055,6 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   color: #56657a;
 }
 
-/* Floating Action Button */
-.neoFloatingBtn {
-  position: fixed;
-  bottom: 20px;
-  right: 22px;
-  z-index: 50;
-  background: #141b27;
-  border: 1px solid #233145;
-  color: #f1f5f9;
-  padding: 7px 15px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.neoFloatingBtn:hover {
-  background: #1c2738;
-  border-color: #38bdf8;
-  color: #ffffff;
-}
-
 @media (max-width: 1280px) {
   .neoLayoutRoot {
     flex-direction: column;
@@ -10016,22 +9989,6 @@ html[data-theme="light"] .neoCompName,
 html[data-theme="light"] .neoCompDesc,
 .neoTerminalApp.light .neoCompDesc {
   color: #64748b;
-}
-
-/* Floating Action Button in Light Theme */
-html[data-theme="light"] .neoFloatingBtn,
-.neoTerminalApp.light .neoFloatingBtn {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  color: #0f172a;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
-}
-
-html[data-theme="light"] .neoFloatingBtn:hover,
-.neoTerminalApp.light .neoFloatingBtn:hover {
-  background: #f8fafc;
-  border-color: #00d084;
-  color: #00a86b;
 }
 
 
