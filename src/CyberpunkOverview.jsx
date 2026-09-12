@@ -22,8 +22,6 @@ import {
   CalendarDays,
   Target,
   RotateCcw,
-  ChevronLeft,
-  ChevronRight,
   LayoutGrid,
   Search,
   SlidersHorizontal,
@@ -1008,26 +1006,6 @@ export default function CyberpunkOverview({
                   <span style={{ color: "#cbd5e1" }}>BSE MTF Book</span>
                 </div>
               )}
-            </div>
-
-            <div className="neoCarouselPill" title="Time horizon">
-              <span onClick={() => {
-                const periods = ["1M", "3M", "6M", "1Y", "ALL"];
-                const curIdx = periods.indexOf(period);
-                const nextIdx = curIdx > 0 ? curIdx - 1 : periods.length - 1;
-                setPeriod(periods[nextIdx]);
-              }} style={{ display: "inline-flex", cursor: "pointer" }}>
-                <ChevronLeft size={13} />
-              </span>
-              <span>{period}</span>
-              <span onClick={() => {
-                const periods = ["1M", "3M", "6M", "1Y", "ALL"];
-                const curIdx = periods.indexOf(period);
-                const nextIdx = curIdx < periods.length - 1 ? curIdx + 1 : 0;
-                setPeriod(periods[nextIdx]);
-              }} style={{ display: "inline-flex", cursor: "pointer" }}>
-                <ChevronRight size={13} />
-              </span>
             </div>
 
             <div className="neoAllTimeHigh">

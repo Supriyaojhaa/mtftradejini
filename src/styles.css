@@ -8961,26 +8961,6 @@ html[data-theme="dark"] .neoThemeBtn:hover,
 .neoLegendLine.emerald { background: #00f090; box-shadow: 0 0 6px #00f090; }
 .neoLegendLine.amber { background: #f59e0b; }
 
-.neoCarouselPill {
-  background: #121926;
-  border: 1px solid #1f2b3e;
-  border-radius: 999px;
-  padding: 3px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  color: #8b9cb4;
-  font-family: "IBM Plex Mono", monospace;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.neoCarouselPill:hover {
-  border-color: #38bdf8;
-  color: #f1f5f9;
-}
-
 .neoAllTimeHigh {
   font-size: 11px;
   color: #8b9cb4;
@@ -9814,19 +9794,6 @@ html[data-theme="light"] .neoChartFooter,
 .neoTerminalApp.light .neoChartFooter {
   border-top-color: #e2e8f0;
   color: #64748b;
-}
-
-html[data-theme="light"] .neoCarouselPill,
-.neoTerminalApp.light .neoCarouselPill {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  color: #64748b;
-}
-
-html[data-theme="light"] .neoCarouselPill:hover,
-.neoTerminalApp.light .neoCarouselPill:hover {
-  border-color: #00d084;
-  color: #0f172a;
 }
 
 html[data-theme="light"] .neoAllTimeHigh,
