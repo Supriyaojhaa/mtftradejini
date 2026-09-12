@@ -33,19 +33,42 @@ import {
   PieChart as PieIcon
 } from "lucide-react";
 
-// Fallback high-fidelity historical trajectory starting 2017 to 2026
+// Fallback high-fidelity historical trajectory starting 2017 to 2026 (stored in Lakhs)
 const DEFAULT_TRAJECTORY = [
-  { year: "2017", combined: 28450, bse: 1200 },
-  { year: "2018", combined: 31200, bse: 1450 },
-  { year: "2019", combined: 36800, bse: 1820 },
-  { year: "2020", combined: 42100, bse: 2150 },
-  { year: "2021", combined: 51800, bse: 2790 },
-  { year: "2022", combined: 68500, bse: 3350 },
-  { year: "2023", combined: 92400, bse: 4100 },
-  { year: "2024", combined: 118600, bse: 5050 },
-  { year: "2025", combined: 139200, bse: 5980 },
-  { year: "2026", combined: 153140.74, bse: 6716.95 }
+  { date: "2017-06-22", combined: 2845000, nse: 2725000, bse: 120000 },
+  { date: "2018-06-22", combined: 3120000, nse: 2975000, bse: 145000 },
+  { date: "2019-06-22", combined: 3680000, nse: 3498000, bse: 182000 },
+  { date: "2020-06-22", combined: 4210000, nse: 3995000, bse: 215000 },
+  { date: "2021-06-22", combined: 5180000, nse: 4901000, bse: 279000 },
+  { date: "2022-06-22", combined: 6850000, nse: 6515000, bse: 335000 },
+  { date: "2023-06-22", combined: 9240000, nse: 8830000, bse: 410000 },
+  { date: "2024-06-22", combined: 11860000, nse: 11355000, bse: 505000 },
+  { date: "2025-06-22", combined: 13920000, nse: 13322000, bse: 598000 },
+  { date: "2026-09-08", combined: 15314074, nse: 14642379, bse: 671695 }
 ];
+
+function formatChartTick(dateStr, period) {
+  if (!dateStr) return "";
+  const s = String(dateStr).trim();
+  const parts = s.split("-");
+  if (parts.length < 3) return s;
+  const year = parts[0];
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2].slice(0, 2), 10);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const mName = months[monthIdx] || parts[1];
+
+  if (period === "1M" || period === "3M") {
+    return `${day} ${mName}`;
+  }
+  if (period === "6M") {
+    return `${mName} '${year.slice(2)}`;
+  }
+  if (period === "1Y") {
+    return `${mName} '${year.slice(2)}`;
+  }
+  return year;
+}
 
 function formatExactCr(lakh, decimals = 2) {
   if (lakh == null || isNaN(lakh)) return "₹0.00 Cr";
@@ -181,7 +204,6 @@ export default function CyberpunkOverview({
 }) {
   const [period, setPeriod] = useState("ALL");
   const [exchange, setExchange] = useState("ALL");
-  const [carouselIdx, setCarouselIdx] = useState(1);
   const [isRotating, setIsRotating] = useState(false);
 
   // Flow section states
@@ -293,37 +315,109 @@ export default function CyberpunkOverview({
 
   const maxHistorical = useMemo(() => {
     if (!history || !history.length) return 154118.92;
-    return Math.max(...history.map((h) => (h.combined || 0) / 100));
-  }, [history]);
+    const key = exchange === "NSE" ? "nse" : exchange === "BSE" ? "bse" : "combined";
+    const maxVal = Math.max(
+      ...history.map((h) => {
+        const v = h[key];
+        return v != null ? (v / 100) : 0;
+      })
+    );
+    return isFinite(maxVal) && maxVal > 0 ? maxVal : 154118.92;
+  }, [history, exchange]);
 
-  // Chart data formatting
+  // Dynamic Chart data responding to both period (1M/3M/6M/1Y/ALL) and exchange (ALL/NSE/BSE)
   const chartData = useMemo(() => {
-    if (history && history.length > 20) {
-      const step = Math.max(1, Math.floor(history.length / 10));
-      const sampled = [];
-      for (let i = 0; i < history.length; i += step) {
-        const item = history[i];
-        const yr = item.date ? String(item.date).slice(0, 4) : `20${17 + sampled.length}`;
-        sampled.push({
-          year: yr,
-          combined: Number((item.combined / 100).toFixed(2)),
-          nse: Number((item.nse / 100).toFixed(2)),
-          bse: Number((item.bse / 100).toFixed(2))
-        });
+    const raw = Array.isArray(history) && history.length ? history : DEFAULT_TRAJECTORY;
+
+    let sliced = raw;
+    if (period === "1M") {
+      sliced = raw.slice(-22);
+    } else if (period === "3M") {
+      sliced = raw.slice(-66);
+    } else if (period === "6M") {
+      sliced = raw.slice(-132);
+    } else if (period === "1Y") {
+      sliced = raw.slice(-252);
+    } else {
+      // ALL
+      if (raw.length > 150) {
+        const step = Math.max(1, Math.floor(raw.length / 100));
+        const sampled = [];
+        for (let i = 0; i < raw.length; i += step) {
+          sampled.push(raw[i]);
+        }
+        const last = raw[raw.length - 1];
+        if (last && sampled[sampled.length - 1] !== last) {
+          sampled.push(last);
+        }
+        sliced = sampled;
       }
-      const lastHist = history[history.length - 1];
-      if (lastHist) {
-        sampled.push({
-          year: String(lastHist.date || "2026").slice(0, 4),
-          combined: Number((lastHist.combined / 100).toFixed(2)),
-          nse: Number((lastHist.nse / 100).toFixed(2)),
-          bse: Number((lastHist.bse / 100).toFixed(2))
-        });
-      }
-      return sampled;
     }
-    return DEFAULT_TRAJECTORY;
-  }, [history]);
+
+    return sliced.map((item, idx) => {
+      const d = item.date ? String(item.date).slice(0, 10) : `20${17 + Math.floor(idx / 12)}-01-15`;
+      const comb = item.combined != null ? (item.combined / 100) : 0;
+      const bseVal = item.bse != null ? (item.bse / 100) : 0;
+      const nseVal = item.nse != null ? (item.nse / 100) : Math.max(0, comb - bseVal);
+
+      return {
+        date: d,
+        year: String(d).slice(0, 4),
+        combined: Number(comb.toFixed(2)),
+        nse: Number(nseVal.toFixed(2)),
+        bse: Number(bseVal.toFixed(2))
+      };
+    });
+  }, [history, period]);
+
+  const xAxisTicks = useMemo(() => {
+    if (period !== "ALL" || !chartData || !chartData.length) return undefined;
+    const yearSeen = new Set();
+    const ticks = [];
+    chartData.forEach((d) => {
+      if (!d.date) return;
+      const y = String(d.date).slice(0, 4);
+      if (!yearSeen.has(y)) {
+        yearSeen.add(y);
+        ticks.push(d.date);
+      }
+    });
+    const lastDate = chartData[chartData.length - 1]?.date;
+    if (lastDate && !ticks.includes(lastDate)) {
+      ticks.push(lastDate);
+    }
+    return ticks;
+  }, [chartData, period]);
+
+  const activeMetricKey = exchange === "NSE" ? "nse" : exchange === "BSE" ? "bse" : "combined";
+
+  const yDomain = useMemo(() => {
+    if (!chartData || !chartData.length) return [0, 160000];
+
+    const values = chartData
+      .map((d) => d[activeMetricKey])
+      .filter((v) => v != null && !isNaN(v) && v > 0);
+
+    if (!values.length) return [0, 160000];
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    if (period === "ALL") {
+      const ceiling = Math.ceil((max * 1.08) / 10000) * 10000;
+      return [0, Math.max(ceiling, 10000)];
+    }
+
+    const diff = max - min;
+    const pad = Math.max(diff * 0.15, max * 0.02, 50);
+    let low = Math.max(0, Math.floor((min - pad) / 500) * 500);
+    let high = Math.ceil((max + pad) / 500) * 500;
+    if (low === high) {
+      low = Math.max(0, low - 500);
+      high = high + 500;
+    }
+    return [low, high];
+  }, [chartData, activeMetricKey, period]);
 
   // Flow data processing
   const visibleFlow = useMemo(() => {
@@ -535,14 +629,6 @@ export default function CyberpunkOverview({
     setTimeout(() => setIsRotating(false), 800);
   };
 
-  const handlePrevCarousel = () => {
-    setCarouselIdx((prev) => (prev > 1 ? prev - 1 : 11));
-  };
-
-  const handleNextCarousel = () => {
-    setCarouselIdx((prev) => (prev < 11 ? prev + 1 : 1));
-  };
-
   return (
     <div className="neoMainCol">
       {/* ====================================================================
@@ -730,10 +816,20 @@ export default function CyberpunkOverview({
             <div className="neoChartTitleBlock">
               <div className="neoChartTitleRow">
                 <span className="neoAccentBar" />
-                <h2 className="neoChartTitle">MTF BOOK LONG TERM TRAJECTORY</h2>
+                <h2 className="neoChartTitle">
+                  {exchange === "NSE"
+                    ? "NSE MTF BOOK TRAJECTORY"
+                    : exchange === "BSE"
+                    ? "BSE MTF BOOK TRAJECTORY"
+                    : "MTF BOOK LONG TERM TRAJECTORY"}
+                </h2>
               </div>
               <p className="neoChartSubtitle">
-                Aggregate leverage financing exposure across Indian exchanges
+                {exchange === "NSE"
+                  ? "National Stock Exchange leverage financing exposure"
+                  : exchange === "BSE"
+                  ? "Bombay Stock Exchange leverage financing exposure"
+                  : "Aggregate leverage financing exposure across Indian exchanges"}
               </p>
             </div>
             <div className="neoChartControls">
@@ -774,6 +870,11 @@ export default function CyberpunkOverview({
                     <stop offset="60%" stopColor="#00f090" stopOpacity={0.12} />
                     <stop offset="100%" stopColor="#00f090" stopOpacity={0.01} />
                   </linearGradient>
+                  <linearGradient id="neoBlueFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.45} />
+                    <stop offset="60%" stopColor="#38bdf8" stopOpacity={0.12} />
+                    <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.01} />
+                  </linearGradient>
                   <linearGradient id="neoAmberFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.35} />
                     <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.02} />
@@ -785,20 +886,23 @@ export default function CyberpunkOverview({
                   vertical={false}
                 />
                 <XAxis
-                  dataKey="year"
+                  dataKey="date"
+                  ticks={period === "ALL" ? xAxisTicks : undefined}
+                  tickFormatter={(v) => formatChartTick(v, period)}
                   tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
+                  minTickGap={period === "ALL" ? 40 : 25}
                   dy={6}
                 />
                 <YAxis
+                  domain={yDomain}
+                  tickCount={5}
                   tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
-                  domain={[0, 160000]}
-                  ticks={[0, 40000, 80000, 120000, 160000]}
-                  tickFormatter={(v) => `₹${v.toLocaleString("en-IN")} Cr`}
-                  width={80}
+                  tickFormatter={(v) => `₹${Math.round(v).toLocaleString("en-IN")} Cr`}
+                  width={90}
                 />
                 <Tooltip
                   contentStyle={{
@@ -812,62 +916,122 @@ export default function CyberpunkOverview({
                     fontFamily: "'IBM Plex Mono', monospace"
                   }}
                   formatter={(val, name) => [
-                    `₹${Number(val).toLocaleString("en-IN")} Cr`,
+                    `₹${Number(val).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`,
                     name === "combined"
                       ? "Combined MTF Book"
+                      : name === "nse"
+                      ? "NSE MTF Book"
                       : name === "bse"
-                      ? "BSE Only"
+                      ? "BSE MTF Book"
                       : name
                   ]}
-                  labelFormatter={(lbl) => `Year ${lbl}`}
+                  labelFormatter={(lbl) => fmtDate(lbl) || lbl}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="combined"
-                  name="combined"
-                  stroke="#00f090"
-                  strokeWidth={2.5}
-                  fill="url(#neoEmeraldFill)"
-                  dot={false}
-                  activeDot={{ r: 5, fill: "#00f090", stroke: "#070a0e", strokeWidth: 2 }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="bse"
-                  name="bse"
-                  stroke="#f59e0b"
-                  strokeWidth={1.8}
-                  fill="url(#neoAmberFill)"
-                  dot={false}
-                />
+                {exchange === "ALL" && (
+                  <>
+                    <Area
+                      type="monotone"
+                      dataKey="combined"
+                      name="combined"
+                      stroke="#00f090"
+                      strokeWidth={2.5}
+                      fill="url(#neoEmeraldFill)"
+                      dot={false}
+                      activeDot={{ r: 5, fill: "#00f090", stroke: "#070a0e", strokeWidth: 2 }}
+                    />
+                    {period === "ALL" && (
+                      <Area
+                        type="monotone"
+                        dataKey="bse"
+                        name="bse"
+                        stroke="#f59e0b"
+                        strokeWidth={1.8}
+                        fill="url(#neoAmberFill)"
+                        dot={false}
+                      />
+                    )}
+                  </>
+                )}
+                {exchange === "NSE" && (
+                  <Area
+                    type="monotone"
+                    dataKey="nse"
+                    name="nse"
+                    stroke="#38bdf8"
+                    strokeWidth={2.5}
+                    fill="url(#neoBlueFill)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "#38bdf8", stroke: "#070a0e", strokeWidth: 2 }}
+                  />
+                )}
+                {exchange === "BSE" && (
+                  <Area
+                    type="monotone"
+                    dataKey="bse"
+                    name="bse"
+                    stroke="#f59e0b"
+                    strokeWidth={2.5}
+                    fill="url(#neoAmberFill)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "#f59e0b", stroke: "#070a0e", strokeWidth: 2 }}
+                  />
+                )}
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
           <div className="neoChartFooter">
             <div className="neoLegendGroup">
-              <div className="neoLegendItem">
-                <span className="neoLegendLine emerald" />
-                <span style={{ color: "#cbd5e1" }}>Combined (NSE + BSE)</span>
-              </div>
-              <div className="neoLegendItem">
-                <span className="neoLegendLine amber" />
-                <span>BSE Only</span>
-              </div>
+              {exchange === "ALL" && (
+                <>
+                  <div className="neoLegendItem">
+                    <span className="neoLegendLine emerald" />
+                    <span style={{ color: "#cbd5e1" }}>Combined (NSE + BSE)</span>
+                  </div>
+                  {period === "ALL" && (
+                    <div className="neoLegendItem">
+                      <span className="neoLegendLine amber" />
+                      <span>BSE Only</span>
+                    </div>
+                  )}
+                </>
+              )}
+              {exchange === "NSE" && (
+                <div className="neoLegendItem">
+                  <span className="neoLegendLine" style={{ background: "#38bdf8" }} />
+                  <span style={{ color: "#cbd5e1" }}>NSE MTF Book</span>
+                </div>
+              )}
+              {exchange === "BSE" && (
+                <div className="neoLegendItem">
+                  <span className="neoLegendLine amber" />
+                  <span style={{ color: "#cbd5e1" }}>BSE MTF Book</span>
+                </div>
+              )}
             </div>
 
-            <div className="neoCarouselPill" title="Navigate trajectory slide">
-              <span onClick={handlePrevCarousel} style={{ display: "inline-flex", cursor: "pointer" }}>
+            <div className="neoCarouselPill" title="Time horizon">
+              <span onClick={() => {
+                const periods = ["1M", "3M", "6M", "1Y", "ALL"];
+                const curIdx = periods.indexOf(period);
+                const nextIdx = curIdx > 0 ? curIdx - 1 : periods.length - 1;
+                setPeriod(periods[nextIdx]);
+              }} style={{ display: "inline-flex", cursor: "pointer" }}>
                 <ChevronLeft size={13} />
               </span>
-              <span>{carouselIdx}/11</span>
-              <span onClick={handleNextCarousel} style={{ display: "inline-flex", cursor: "pointer" }}>
+              <span>{period}</span>
+              <span onClick={() => {
+                const periods = ["1M", "3M", "6M", "1Y", "ALL"];
+                const curIdx = periods.indexOf(period);
+                const nextIdx = curIdx < periods.length - 1 ? curIdx + 1 : 0;
+                setPeriod(periods[nextIdx]);
+              }} style={{ display: "inline-flex", cursor: "pointer" }}>
                 <ChevronRight size={13} />
               </span>
             </div>
 
             <div className="neoAllTimeHigh">
-              <span>All-time MTF High:</span>
+              <span>{exchange === "NSE" ? "All-time NSE High:" : exchange === "BSE" ? "All-time BSE High:" : "All-time MTF High:"}</span>
               <b>₹{maxHistorical.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr</b>
             </div>
           </div>
