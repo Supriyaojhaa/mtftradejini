@@ -808,8 +808,9 @@ function App(){
             <span className="neoBrandTitle">MTF ANALYTICS</span>
           </div>
 
-          <div className="neoLiveCircle" title="Live Exchange Sync" aria-label="Live Exchange Feed">
+          <div className="neoLiveBadge" title="Live Exchange Sync" aria-label="Live Exchange Feed">
             <span className="neoLiveDot" />
+            <span className="neoLiveText">LIVE</span>
           </div>
 
           <div className="neoDisclosure">

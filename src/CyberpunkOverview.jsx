@@ -406,9 +406,9 @@ export default function CyberpunkOverview({
           fresh = (f.fresh || 0) / 100;
           liq = (f.liquidated || 0) / 100;
         } else {
-          const seed = (w * 5 + d) * 19 + dt.getDate() * 29;
+          const seed = (w * 7 + d) * 19 + dt.getDate() * 29;
           const pseudo = Math.sin(seed);
-          if (pseudo > 0.12) {
+          if (pseudo > 0.08) {
             net = Math.round((140 + Math.sin(seed * 2) * 320) * 10) / 10;
             fresh = Math.round(net * 1.45 + 180);
             liq = fresh - net;
@@ -1152,11 +1152,13 @@ export default function CyberpunkOverview({
 
           <div className="neoHeatmapBody">
             <div className="neoHeatmapDaysCol">
+              <span style={{ visibility: "hidden" }}>Sun</span>
               <span>Mon</span>
               <span style={{ visibility: "hidden" }}>Tue</span>
               <span>Wed</span>
               <span style={{ visibility: "hidden" }}>Thu</span>
               <span>Fri</span>
+              <span style={{ visibility: "hidden" }}>Sat</span>
             </div>
 
             <div className="neoHeatmapCols">
