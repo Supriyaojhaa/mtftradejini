@@ -185,6 +185,123 @@ function CustomFlowTooltip({ active, payload, dark = true }) {
   );
 }
 
+function CustomTrajectoryTooltip({ active, payload, label, dark = true, exchange = "ALL" }) {
+  if (!active || !payload || !payload.length) return null;
+  const d = payload[0]?.payload;
+  if (!d) return null;
+
+  const dateStr = fmtDate(d.date || label) || label;
+
+  const items = [];
+  if (exchange === "ALL") {
+    if (d.combined != null) {
+      items.push({
+        id: "combined",
+        label: "Combined MTF Book",
+        val: d.combined,
+        color: dark ? "#00f090" : "#059669"
+      });
+    }
+    if (d.nse != null) {
+      items.push({
+        id: "nse",
+        label: "NSE MTF Book",
+        val: d.nse,
+        color: dark ? "#38bdf8" : "#0284c7"
+      });
+    }
+    if (d.bse != null) {
+      items.push({
+        id: "bse",
+        label: "BSE MTF Book",
+        val: d.bse,
+        color: dark ? "#f59e0b" : "#d97706"
+      });
+    }
+  } else if (exchange === "NSE") {
+    if (d.nse != null) {
+      items.push({
+        id: "nse",
+        label: "NSE MTF Book",
+        val: d.nse,
+        color: dark ? "#38bdf8" : "#0284c7"
+      });
+    }
+  } else if (exchange === "BSE") {
+    if (d.bse != null) {
+      items.push({
+        id: "bse",
+        label: "BSE MTF Book",
+        val: d.bse,
+        color: dark ? "#f59e0b" : "#d97706"
+      });
+    }
+  }
+
+  return (
+    <div
+      style={{
+        background: dark ? "rgba(10, 16, 26, 0.96)" : "#ffffff",
+        backdropFilter: "blur(10px)",
+        border: `1px solid ${dark ? "#1e2e46" : "#e2e8f0"}`,
+        borderRadius: "9px",
+        padding: "10px 14px",
+        boxShadow: dark ? "0 10px 30px rgba(0,0,0,0.6)" : "0 8px 24px rgba(0,0,0,0.12)",
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: "12px",
+        minWidth: "230px"
+      }}
+    >
+      <div
+        style={{
+          color: dark ? "#94a3b8" : "#64748b",
+          fontSize: "11px",
+          fontWeight: 600,
+          marginBottom: "8px",
+          borderBottom: `1px solid ${dark ? "rgba(255,255,255,0.06)" : "#f1f5f9"}`,
+          paddingBottom: "5px"
+        }}
+      >
+        {dateStr}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        {items.map((item) => (
+          <div
+            key={item.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "14px"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+              <span
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: item.color,
+                  boxShadow: dark ? `0 0 6px ${item.color}` : "none",
+                  display: "inline-block",
+                  flexShrink: 0
+                }}
+              />
+              <span style={{ color: dark ? "#cbd5e1" : "#475569", fontSize: "11.5px" }}>
+                {item.label}
+              </span>
+            </div>
+            <b style={{ color: item.color, fontSize: "12px" }}>
+              ₹{Number(item.val).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr
+            </b>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function CyberpunkOverview({
   data,
   summary,
@@ -903,29 +1020,7 @@ export default function CyberpunkOverview({
                   tickFormatter={(v) => `₹${Math.round(v).toLocaleString("en-IN")} Cr`}
                   width={90}
                 />
-                <Tooltip
-                  contentStyle={{
-                    background: dark ? "rgba(10, 16, 26, 0.95)" : "rgba(255, 255, 255, 0.98)",
-                    backdropFilter: "blur(8px)",
-                    border: `1px solid ${dark ? "#1e2e46" : "#e2e8f0"}`,
-                    borderRadius: 8,
-                    color: dark ? "#f8fafc" : "#0f172a",
-                    boxShadow: dark ? "0 10px 25px rgba(0,0,0,0.5)" : "0 8px 24px rgba(0,0,0,0.1)",
-                    fontSize: 12,
-                    fontFamily: "'IBM Plex Mono', monospace"
-                  }}
-                  formatter={(val, name) => [
-                    `₹${Number(val).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`,
-                    name === "combined"
-                      ? "Combined MTF Book"
-                      : name === "nse"
-                      ? "NSE MTF Book"
-                      : name === "bse"
-                      ? "BSE MTF Book"
-                      : name
-                  ]}
-                  labelFormatter={(lbl) => fmtDate(lbl) || lbl}
-                />
+                <Tooltip content={<CustomTrajectoryTooltip dark={dark} exchange={exchange} />} />
                 {exchange === "ALL" && (
                   <>
                     <Area
