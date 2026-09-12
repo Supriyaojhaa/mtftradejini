@@ -42,7 +42,6 @@ import {
   Grid3X3,
   LayoutGrid,
   BarChart3,
-  RefreshCw,
   Info,
   ShieldCheck,
 } from "lucide-react";
@@ -262,7 +261,6 @@ function computeSquarifiedLayout(items, x = 0, y = 0, w = 100, h = 100) {
 export default function SectorsView({ onBack }) {
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [lastRefreshed, setLastRefreshed] = useState(new Date());
   const [isLight, setIsLight] = useState(
     typeof document !== "undefined" && document.documentElement.dataset.theme === "light"
   );
@@ -305,13 +303,11 @@ export default function SectorsView({ onBack }) {
       if (json.all_stocks && json.all_stocks.length > 0) {
         const enriched = json.all_stocks.map(enrichStock);
         setStocks(enriched);
-        setLastRefreshed(new Date());
       }
     } catch (err) {
       console.warn("Using offline fallback sector universe:", err);
       const enriched = FALLBACK_RAW_STOCKS.map(enrichStock);
       setStocks(enriched);
-      setLastRefreshed(new Date());
     } finally {
       setLoading(false);
     }
@@ -760,14 +756,6 @@ export default function SectorsView({ onBack }) {
         </div>
 
         <div className="sectorsHeaderRight">
-          <div className="sectorsRefreshBox">
-            <span className="sectorsRefreshTime">
-              Updated: {lastRefreshed.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-            </span>
-            <button className="sectorsRefreshBtn" onClick={loadData} disabled={loading} title="Refresh Sector Feeds">
-              <RefreshCw size={14} className={loading ? "spinIcon" : ""} />
-            </button>
-          </div>
           <div className="sectorsTotalBadge">
             <span className="totalLabel">TOTAL MARKET MTF</span>
             <b className="totalVal">{formatExactCr(totalMarketMTF)}</b>
