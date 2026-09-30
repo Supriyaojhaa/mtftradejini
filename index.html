@@ -1,1 +1,110 @@
-<!doctype html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#f8fafc"/><script>(function(){try{var s=localStorage.getItem("mtf_theme")||localStorage.getItem("theme");var t=(s==="dark")?"dark":"light";document.documentElement.setAttribute("data-theme",t);document.documentElement.dataset.theme=t;if(t==="dark"){var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content","#050b16");}}catch(e){document.documentElement.setAttribute("data-theme","light");document.documentElement.dataset.theme="light";}})();</script><title>MTF Analytics</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f8fafc" />
+
+    <!-- Primary SEO Meta Tags -->
+    <title>MTF Analytics | Live NSE & BSE Margin Trading Facility Dashboard</title>
+    <meta name="title" content="MTF Analytics | Live NSE & BSE Margin Trading Facility Dashboard" />
+    <meta
+      name="description"
+      content="Track ₹1.55+ Lakh Crore of active Margin Trading Facility (MTF) exposure across NSE and BSE. Real-time leverage flow, stock screener, liquidation alerts, Days to Cover (DTC), and SEBI margin haircut analytics."
+    />
+    <meta
+      name="keywords"
+      content="MTF analytics, margin trading facility, NSE MTF list, BSE MTF book, MTF leverage calculator, MTF stocks list India, margin haircut, days to cover MTF, Tradejini MTF, MTF liquidation tracker, SEBI margin trading"
+    />
+    <meta name="author" content="MTF Analytics" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mtf.trading/" />
+
+    <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mtf.trading/" />
+    <meta property="og:title" content="MTF Analytics | Institutional Margin Intelligence for Indian Equities" />
+    <meta
+      property="og:description"
+      content="Monitor systemic leverage, track daily fresh exposure vs forced liquidations, and screen 4,000+ MTF stocks across NSE and BSE."
+    />
+    <meta property="og:image" content="https://mtf.trading/emerald_mountain_mist.jpg" />
+    <meta property="og:site_name" content="MTF Analytics" />
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://mtf.trading/" />
+    <meta name="twitter:title" content="MTF Analytics | Live NSE & BSE Margin Trading Facility Dashboard" />
+    <meta
+      name="twitter:description"
+      content="Track ₹1.55+ Lakh Crore in MTF exposure. Screener, daily leverage flow, and liquidation risk telemetry."
+    />
+    <meta name="twitter:image" content="https://mtf.trading/emerald_mountain_mist.jpg" />
+
+    <!-- GEO / Schema.org Structured Data (JSON-LD for LLMs & AI Engines) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://mtf.trading/#webapp",
+            "name": "MTF Analytics Dashboard",
+            "url": "https://mtf.trading",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "All",
+            "description": "Institutional-grade Margin Trading Facility (MTF) analytics engine tracking over ₹1.55 Lakh Crore of active leverage exposure across Indian exchanges (NSE and BSE).",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "INR"
+            },
+            "featureList": [
+              "Live NSE and BSE combined MTF book tracking",
+              "Historical trajectory from 2017 to 2026",
+              "Daily leverage flow (fresh inflow vs liquidated margin outflow)",
+              "Days to Cover (DTC) risk classification",
+              "4,000+ active securities MTF stock screener",
+              "SEBI margin haircut and category breakdowns"
+            ]
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://mtf.trading/#dataset",
+            "name": "Indian Equities Margin Trading Facility (MTF) Aggregate Book Data",
+            "description": "Daily normalized statutory exchange disclosures of margin trading facility exposures across NSE and BSE.",
+            "license": "https://creativecommons.org/licenses/by/4.0/",
+            "creator": {
+              "@type": "Organization",
+              "name": "MTF Analytics",
+              "url": "https://mtf.trading"
+            }
+          }
+        ]
+      }
+    </script>
+
+    <!-- Theme Preference Initialization -->
+    <script>
+      (function () {
+        try {
+          var s = localStorage.getItem("mtf_theme") || localStorage.getItem("theme");
+          var t = s === "dark" ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", t);
+          document.documentElement.dataset.theme = t;
+          if (t === "dark") {
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute("content", "#050b16");
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

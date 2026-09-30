@@ -8432,29 +8432,73 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   color: #ffffff;
 }
 
-@media (max-width: 640px) {
-  .neoTopbar {
-    padding: 0 14px;
-    height: 52px;
-  }
-  .neoTopbarLeft {
-    gap: 12px;
-  }
-  .neoBrandTitle {
-    font-size: 13.5px;
-  }
-  .neoDisclosureTitle {
-    font-size: 10px;
-  }
-  .neoDisclosureSubtitle {
-    font-size: 9.5px;
-  }
+.neoMobileMenuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #1a273b;
+  background: #0d131f;
+  color: #f1f5f9;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.neoMobileMenuBtn:hover {
+  background: #141f30;
+  border-color: #243650;
+  color: #00f090;
+}
+
+.neoMobileDrawerHeader {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 10px;
+}
+
+.neoMobileDrawerTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.neoMobileDrawerClose {
+  background: transparent;
+  border: 1px solid #172233;
+  border-radius: 6px;
+  color: #8b9cb4;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.neoMobileDrawerClose:hover {
+  border-color: #ff3b57;
+  color: #ff3b57;
+}
+
+.neoMobileBackdrop {
+  display: none;
 }
 
 .neoLayoutRoot {
   display: flex;
   gap: 14px;
   max-width: 1720px;
+  width: 100%;
   margin: 14px auto 0;
   padding: 0 18px;
   align-items: flex-start;
@@ -8523,7 +8567,7 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   box-shadow: 0 0 10px rgba(0, 240, 144, 0.7);
 }
 
-.neoLiveBadge {
+.neoNavItem .neoLiveBadge {
   margin-left: auto;
   font-size: 9.5px;
   font-weight: 700;
@@ -8653,10 +8697,13 @@ html[data-theme="dark"] .neoThemeBtn:hover,
 /* Main Content Area */
 .neoMainCol {
   flex: 1;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  box-sizing: border-box;
 }
 
 /* KPI 4-Card Row */
@@ -9056,9 +9103,10 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   color: #56657a;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1280px) and (min-width: 781px) {
   .neoLayoutRoot {
     flex-direction: column;
+    align-items: stretch;
   }
   .neoSidebarCol {
     width: 100%;
@@ -9076,12 +9124,249 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 780px) {
+  .neoTopbar {
+    padding: 0 12px;
+    height: 54px;
+  }
+  .neoTopbarLeft {
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+  .neoMobileMenuBtn {
+    display: inline-flex;
+  }
+  .neoBrandTitle {
+    font-size: 13.5px;
+  }
+  .neoLiveBadge {
+    padding: 0 6px;
+    height: 20px;
+    font-size: 9px;
+  }
+  .neoDisclosure {
+    display: none;
+  }
+  .neoLayoutRoot {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 10px;
+    margin: 10px auto 0;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  .neoSidebarCol {
+    position: fixed;
+    top: 54px;
+    left: 0;
+    bottom: 0;
+    width: 290px;
+    max-width: 86vw;
+    background: #080c14;
+    z-index: 1000;
+    padding: 16px 14px 28px;
+    overflow-y: auto;
+    box-shadow: 6px 0 28px rgba(0, 0, 0, 0.5);
+    transform: translateX(-105%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border-right: 1px solid #162032;
+    box-sizing: border-box;
+    gap: 12px;
+  }
+  html[data-theme="light"] .neoSidebarCol,
+  .neoTerminalApp.light .neoSidebarCol {
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    box-shadow: 6px 0 28px rgba(0, 0, 0, 0.12);
+  }
+  .neoSidebarCol.mobileOpen {
+    transform: translateX(0);
+  }
+  .neoMobileDrawerHeader {
+    display: flex;
+  }
+  .neoMobileBackdrop {
+    position: fixed;
+    top: 54px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    display: block;
+  }
+  .neoMainCol {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    gap: 10px;
+  }
   .neoKpiRow {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .neoKpiCard {
+    height: auto;
+    min-height: 128px;
+    padding: 12px 14px 10px;
+  }
+  .neoKpiValue {
+    font-size: 20px;
+  }
+  .neoDeltaItem {
+    font-size: 11.5px;
+  }
+  .neoDeltaPct {
+    font-size: 11px;
+  }
+  .neoLowerRow {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .neoMainChartCard {
+    padding: 14px 12px 12px;
+    min-height: 350px;
+    box-sizing: border-box;
+  }
+  .neoChartHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .neoChartTitleBlock {
+    width: 100%;
+  }
+  .neoChartSubtitle {
+    padding-left: 11px;
+    font-size: 10px;
+  }
+  .neoChartControls {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .neoPillGroup {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .neoFilterBtn {
+    flex: 1;
+    padding: 4px 6px;
+    font-size: 10px;
+    text-align: center;
+  }
+  .neoChartBody {
+    height: 250px;
+    margin: 10px 0 4px;
+  }
+  .neoChartFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .neoLegendGroup {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .neoAllTimeHigh {
+    width: 100%;
+    justify-content: flex-start;
+    font-size: 9.5px;
   }
   .neoTelemetryCol {
+    width: 100%;
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .neoFlowCard,
+  .neoHeatmapCard,
+  .neoTableCard,
+  .neoCompCard {
+    padding: 14px 12px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .neoFlowMetaRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .neoFlowStatPillsWrap {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .neoFlowPill {
+    flex: 1 1 auto;
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  .neoHeatmapHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .neoHeatmapSubStats {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 10px;
+  }
+  .neoTableHead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .neoTableTools {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+  }
+  .neoSearchWrap {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .neoSelect {
+    width: 100%;
+  }
+  .neoTableActionBtn {
+    justify-content: center;
+    width: 100%;
+  }
+  .neoPagination {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    text-align: center;
+  }
+  .neoDonutWrap {
+    flex-direction: column;
+    height: auto;
+    gap: 16px;
+    align-items: center;
+  }
+  .neoDonutChartBox {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .neoCompList {
+    width: 100%;
   }
 }
 
@@ -9172,6 +9457,11 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   padding: 16px 20px 18px;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .neoHeatmapHead {
@@ -9219,6 +9509,10 @@ html[data-theme="dark"] .neoThemeBtn:hover,
   overflow-x: auto;
   padding-bottom: 4px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
 .neoHeatmapMonthsRow {
@@ -9592,6 +9886,40 @@ html[data-theme="light"] .neoTerminalApp,
 .neoTerminalApp.light {
   background-color: #f1f5f9;
   color: #0f172a;
+}
+
+html[data-theme="light"] .neoMobileMenuBtn,
+.neoTerminalApp.light .neoMobileMenuBtn {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .neoMobileMenuBtn:hover,
+.neoTerminalApp.light .neoMobileMenuBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #059669;
+}
+
+html[data-theme="light"] .neoMobileDrawerHeader,
+.neoTerminalApp.light .neoMobileDrawerHeader {
+  border-bottom-color: #e2e8f0;
+}
+
+html[data-theme="light"] .neoMobileDrawerClose,
+.neoTerminalApp.light .neoMobileDrawerClose {
+  border-color: #e2e8f0;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+html[data-theme="light"] .neoMobileDrawerClose:hover,
+.neoTerminalApp.light .neoMobileDrawerClose:hover {
+  border-color: #ff3b57;
+  color: #ff3b57;
+  background: #fee2e2;
 }
 
 /* Sidebar Navigation in Light Theme */

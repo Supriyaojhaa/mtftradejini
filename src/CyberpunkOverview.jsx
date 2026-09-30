@@ -314,7 +314,8 @@ export default function CyberpunkOverview({
   bseSecCount = 1856,
   onRefresh,
   onNavigate,
-  dark = true
+  dark = true,
+  isMobile = false
 }) {
   const [period, setPeriod] = useState("ALL");
   const [exchange, setExchange] = useState("ALL");
@@ -978,7 +979,12 @@ export default function CyberpunkOverview({
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
-                margin={{ top: 12, right: 12, left: 10, bottom: 0 }}
+                margin={{
+                  top: 12,
+                  right: isMobile ? 6 : 12,
+                  left: isMobile ? -14 : 10,
+                  bottom: 0
+                }}
               >
                 <defs>
                   <linearGradient id="neoEmeraldFill" x1="0" y1="0" x2="0" y2="1">
@@ -1005,20 +1011,20 @@ export default function CyberpunkOverview({
                   dataKey="date"
                   ticks={period === "ALL" ? xAxisTicks : undefined}
                   tickFormatter={(v) => formatChartTick(v, period)}
-                  tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
+                  tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: isMobile ? 9.5 : 11 }}
                   axisLine={false}
                   tickLine={false}
-                  minTickGap={period === "ALL" ? 40 : 25}
+                  minTickGap={isMobile ? (period === "ALL" ? 45 : 30) : (period === "ALL" ? 40 : 25)}
                   dy={6}
                 />
                 <YAxis
                   domain={yDomain}
                   tickCount={5}
-                  tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: 11 }}
+                  tick={{ fill: dark ? "#56657a" : "#64748b", fontSize: isMobile ? 9.5 : 11 }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `₹${Math.round(v).toLocaleString("en-IN")} Cr`}
-                  width={90}
+                  tickFormatter={(v) => isMobile ? `₹${Math.round(v/1000)}k` : `₹${Math.round(v).toLocaleString("en-IN")} Cr`}
+                  width={isMobile ? 55 : 90}
                 />
                 <Tooltip content={<CustomTrajectoryTooltip dark={dark} exchange={exchange} />} />
                 {exchange === "ALL" && (

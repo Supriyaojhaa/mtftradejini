@@ -536,7 +536,7 @@ function App(){
    });
  };
   const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
-  const [mobileNavOpen,setMobileNavOpen]=useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [isMobile,setIsMobile]=useState(()=>(typeof window!=="undefined"?window.innerWidth<=780:false));
 
   useEffect(() => {
@@ -549,6 +549,7 @@ function App(){
       }
     };
     window.addEventListener("keydown", handleKeyDown);
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", handleKeyDown);
@@ -791,10 +792,20 @@ function App(){
       {/* Top Header Bar matching design reference */}
       <header className="neoTopbar">
         <div className="neoTopbarLeft">
+          <button
+            type="button"
+            className="neoMobileMenuBtn"
+            onClick={() => setMobileNavOpen((prev) => !prev)}
+            aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileNavOpen}
+          >
+            {mobileNavOpen ? <X size={19} /> : <Menu size={19} />}
+          </button>
+
           <div
             className="neoBrand"
-            onClick={() => setTab("overview")}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setTab("overview"); }}
+            onClick={() => { setTab("overview"); setMobileNavOpen(false); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { setTab("overview"); setMobileNavOpen(false); } }}
             role="button"
             tabIndex={0}
             title="MTF Analytics - Home"
@@ -835,13 +846,35 @@ function App(){
       </header>
 
       <div className="neoLayoutRoot">
-        {/* Left Sidebar */}
-        <aside className="neoSidebarCol">
+        {/* Mobile Backdrop */}
+        {mobileNavOpen && (
+          <div
+            className="neoMobileBackdrop"
+            onClick={() => setMobileNavOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Left Sidebar (Desktop fixed column, Mobile slide-over drawer) */}
+        <aside className={`neoSidebarCol ${mobileNavOpen ? "mobileOpen" : ""}`}>
+          {/* Mobile Drawer Header */}
+          <div className="neoMobileDrawerHeader">
+            <span className="neoMobileDrawerTitle">NAVIGATION</span>
+            <button
+              type="button"
+              className="neoMobileDrawerClose"
+              onClick={() => setMobileNavOpen(false)}
+              aria-label="Close navigation"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
           {/* Navigation Container */}
           <div className="neoNavContainer">
             <button
               className={`neoNavItem ${tab === "overview" ? "active" : ""}`}
-              onClick={() => setTab("overview")}
+              onClick={() => { setTab("overview"); setMobileNavOpen(false); }}
             >
               <LayoutGrid size={16} color={tab === "overview" ? "#00f090" : "#64748b"} />
               <span>Overview</span>
@@ -850,7 +883,7 @@ function App(){
 
             <button
               className={`neoNavItem ${tab === "screener" ? "active" : ""}`}
-              onClick={() => setTab("screener")}
+              onClick={() => { setTab("screener"); setMobileNavOpen(false); }}
             >
               <Search size={16} color={tab === "screener" ? "#00f090" : "#64748b"} />
               <span>Stock Screener</span>
@@ -858,7 +891,7 @@ function App(){
 
             <button
               className={`neoNavItem ${tab === "sectors" ? "active" : ""}`}
-              onClick={() => setTab("sectors")}
+              onClick={() => { setTab("sectors"); setMobileNavOpen(false); }}
             >
               <PieIcon size={16} color={tab === "sectors" ? "#00f090" : "#64748b"} />
               <span>Sectors & Heatmap</span>
@@ -959,6 +992,7 @@ function App(){
             onRefresh={fetchDashboardData}
             onNavigate={setTab}
             dark={dark}
+            isMobile={isMobile}
           />
         )}
       </div>
